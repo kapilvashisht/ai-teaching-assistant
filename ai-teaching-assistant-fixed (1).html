@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Teaching Assistant</title>
+<link rel="manifest" href="manifest.json"><meta name="theme-color" content="#0f4c5c"><link rel="icon" href="icon-192.png"><link rel="apple-touch-icon" href="icon-192.png">
+<script src="https://js.puter.com/v2/"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+:root{--bg:#f6f8f9;--sf:#fff;--tx:#1f2937;--mu:#5b6770;--pr:#0f4c5c;--pt:#fff;--ac:#f59e0b;--bd:#dce3e8;--ub:#0f4c5c;--ut:#fff;--ok:#15803d;--wr:#b45309;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg:#10181c;--sf:#18242a;--tx:#e6edf0;--mu:#93a4ad;--pr:#4fb3c8;--pt:#06222a;--bd:#2a3a42;--ub:#1d6b80;--ok:#4ade80;--wr:#fbbf24}}
+:root[data-theme=dark]{--bg:#10181c;--sf:#18242a;--tx:#e6edf0;--mu:#93a4ad;--pr:#4fb3c8;--pt:#06222a;--bd:#2a3a42;--ub:#1d6b80;--ok:#4ade80;--wr:#fbbf24}
+*{box-sizing:border-box}html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+header{padding:10px 14px;background:var(--sf);border-bottom:1px solid var(--bd);display:flex;align-items:center;gap:10px}
+header h1{font:700 17px Georgia,serif;margin:0;color:var(--pr);flex:1}
+button,select,input,textarea{font:inherit;color:var(--tx)}
+.btn{background:var(--pr);color:var(--pt);border:0;border-radius:10px;padding:8px 14px;cursor:pointer;font-weight:600}
+.btn.s{background:var(--sf);color:var(--pr);border:1px solid var(--bd)}.btn.sm{padding:5px 10px;font-size:13px}.btn:disabled{opacity:.5}
+main{flex:1;overflow:hidden;position:relative}
+.pg{position:absolute;inset:0;overflow-y:auto;padding:12px 14px 20px;display:none}.pg.on{display:block}
+#chat.on{display:flex;flex-direction:column;padding:0}
+#msgs{flex:1;overflow-y:auto;padding:12px 14px}
+.m{max-width:92%;margin:0 0 10px;padding:9px 12px;border-radius:14px;background:var(--sf);border:1px solid var(--bd);overflow-wrap:anywhere}
+.m.u{margin-left:auto;background:var(--ub);color:var(--ut);border:0}
+.m p{margin:.3em 0}.m ul,.m ol{margin:.3em 0;padding-left:20px}.m h3,.m h4{margin:.6em 0 .2em;color:var(--pr)}.m.u h3{color:inherit}
+.tw{overflow-x:auto}table{border-collapse:collapse;font-size:13px}td,th{border:1px solid var(--bd);padding:4px 7px;text-align:left}
+.bar{padding:8px 12px;background:var(--sf);border-top:1px solid var(--bd)}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px}.chip{flex:none;border:1px solid var(--bd);background:var(--bg);border-radius:99px;padding:4px 11px;font-size:13px;cursor:pointer;color:var(--pr)}
+.chip.on{background:var(--pr);color:var(--pt)}
+.row{display:flex;gap:6px;align-items:flex-end}.row textarea{flex:1;max-height:110px;resize:none;border:1px solid var(--bd);border-radius:12px;padding:8px 10px;background:var(--bg)}
+.ib{width:40px;height:40px;border-radius:50%;border:1px solid var(--bd);background:var(--sf);cursor:pointer;font-size:17px;flex:none}
+.att{font-size:12px;color:var(--mu);padding:0 2px 6px}
+nav{display:flex;background:var(--sf);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px)}
+nav button{flex:1;border:0;background:none;padding:8px 2px;font-size:11px;color:var(--mu);cursor:pointer}nav button b{display:block;font-size:19px;font-weight:400}nav button.on{color:var(--pr);font-weight:700}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+.card h2{font:700 16px Georgia,serif;margin:0 0 8px;color:var(--pr)}
+label{display:block;font-size:12px;color:var(--mu);margin:8px 0 3px}
+input,select,textarea.f{width:100%;border:1px solid var(--bd);border-radius:10px;padding:8px 10px;background:var(--bg)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.out{margin-top:10px;border-top:1px dashed var(--bd);padding-top:8px}.out .bd{min-height:20px}.out .bd[contenteditable=true]{outline:2px solid var(--ac);border-radius:6px;padding:4px}
+.tb{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:8px;font-size:13px}
+.note{font-size:12px;color:var(--wr)}.err{color:#dc2626;font-size:13px}
+.vis img{width:100%;border-radius:10px;border:1px solid var(--bd);background:#fff}
+.cap{font-weight:600;margin:6px 0 2px}.prog{height:5px;background:var(--bd);border-radius:9px;overflow:hidden}.prog i{display:block;height:100%;width:0;background:var(--ac)}
+td input{width:62px;padding:3px 5px}.fl{color:var(--wr);font-weight:600}
+dialog{border:1px solid var(--bd);border-radius:14px;background:var(--sf);color:var(--tx);width:min(92vw,420px)}
+
+:root[data-theme=midnight]{--bg:#0b1020;--sf:#141b30;--tx:#e5e9f5;--mu:#8f9bbd;--pr:#8ab4ff;--pt:#0b1020;--ac:#fbbf24;--bd:#263052;--ub:#2f5bd8;--ut:#fff;--ok:#4ade80;--wr:#fbbf24}
+:root[data-theme=ocean]{--bg:#eef7fb;--sf:#fff;--tx:#12303d;--mu:#4a6b7a;--pr:#0369a1;--pt:#fff;--ac:#06b6d4;--bd:#cfe3ee;--ub:#0369a1;--ut:#fff;--ok:#15803d;--wr:#b45309}
+:root[data-theme=forest]{--bg:#f1f7f2;--sf:#fff;--tx:#16301f;--mu:#4d6b57;--pr:#166534;--pt:#fff;--ac:#eab308;--bd:#d1e5d5;--ub:#166534;--ut:#fff;--ok:#15803d;--wr:#b45309}
+:root[data-theme=sunset]{--bg:#fff6f0;--sf:#fff;--tx:#3a1f12;--mu:#7a5a4a;--pr:#c2410c;--pt:#fff;--ac:#f59e0b;--bd:#f3d9c9;--ub:#c2410c;--ut:#fff;--ok:#15803d;--wr:#b45309}
+:root[data-theme=royal]{--bg:#f5f3ff;--sf:#fff;--tx:#2a1a4a;--mu:#6b5b8c;--pr:#6d28d9;--pt:#fff;--ac:#f472b6;--bd:#ddd6fe;--ub:#6d28d9;--ut:#fff;--ok:#15803d;--wr:#b45309}
+:root[data-theme=contrast]{--bg:#fff;--sf:#fff;--tx:#000;--mu:#222;--pr:#000;--pt:#fff;--ac:#ffbf00;--bd:#000;--ub:#000;--ut:#fff;--ok:#006400;--wr:#7a3e00}
+body{font-size:calc(15px*var(--fz,1))}
+.pg.on{animation:fd .25s ease}@keyframes fd{from{opacity:0;transform:translateY(6px)}}
+.m{animation:pp .25s ease}@keyframes pp{from{opacity:0;transform:translateY(8px) scale(.98)}}
+.btn,.chip,.tile,.opt,.ib{transition:transform .12s,box-shadow .12s,border-color .15s}.btn:active,.chip:active,.tile:active,.opt:active,.ib:active{transform:scale(.96)}
+.tg{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.tile{display:block;width:100%;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:12px;text-align:left;cursor:pointer;margin-bottom:8px}.tg .tile{margin:0;display:flex;flex-direction:column;align-items:flex-start;justify-content:flex-start}
+.tile:hover{transform:translateY(-2px);border-color:var(--pr);box-shadow:0 4px 12px #0001}.tile b{display:block;font-size:22px;font-weight:400}.tile span{font-size:12px;color:var(--mu)}
+.hero{background:var(--pr);color:var(--pt);border-radius:16px;padding:16px;margin-bottom:12px}.hero h2{margin:0;font:700 22px Georgia,serif}.hero p{margin:4px 0 0;opacity:.85;font-size:13px}
+.back{color:var(--pr);font-weight:600;cursor:pointer;margin-bottom:8px;font-size:14px}
+.dots i{display:inline-block;width:7px;height:7px;margin:0 2px;border-radius:50%;background:var(--mu);animation:bn 1s infinite}.dots i:nth-child(2){animation-delay:.15s}.dots i:nth-child(3){animation-delay:.3s}
+@keyframes bn{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-5px);opacity:1}}
+#toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);background:var(--pr);color:var(--pt);padding:8px 16px;border-radius:99px;font-size:13px;opacity:0;pointer-events:none;transition:.25s;z-index:50}#toast.on{opacity:1;transform:translate(-50%,0)}
+.swg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.sw{height:54px;border-radius:12px;border:2px solid var(--bd);cursor:pointer;color:#fff;font-size:11px;font-weight:700;text-shadow:0 1px 2px #000a;display:flex;align-items:flex-end;justify-content:center;padding:4px}.sw.on{border-color:var(--ac);box-shadow:0 0 0 2px var(--ac)}
+.big{font:700 52px Georgia,serif;text-align:center;color:var(--pr);margin:6px 0}.res{text-align:center;padding:10px}
+.opt{display:block;width:100%;text-align:left;margin:6px 0;padding:10px 12px;border:1px solid var(--bd);border-radius:12px;background:var(--bg);cursor:pointer}.opt:hover:not(:disabled){border-color:var(--pr)}.opt.ok{background:#16a34a33;border-color:#16a34a}.opt.bad{background:#dc262633;border-color:#dc2626}
+.fcard{perspective:800px;height:170px;cursor:pointer;margin:8px 0}.fin{position:relative;width:100%;height:100%;transition:transform .5s;transform-style:preserve-3d}.fcard.flip .fin{transform:rotateY(180deg)}
+.ff,.fb{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;border-radius:14px;backface-visibility:hidden;border:1px solid var(--bd);font-weight:600}.ff{background:var(--sf)}.fb{background:var(--pr);color:var(--pt);transform:rotateY(180deg)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+#splash{position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,#0a3441,#0f4c5c 55%,#157089);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;text-align:center;transition:opacity .5s,visibility .5s;cursor:pointer}
+#splash.out{opacity:0;visibility:hidden}
+#splash h1{font:700 28px Georgia,serif;margin:8px 0 0;animation:su .8s .9s both}
+#splash p{margin:0;opacity:.85;font-size:14px;animation:su .8s 1.2s both}
+#splash small{position:absolute;bottom:calc(24px + env(safe-area-inset-bottom,0px));opacity:.6;font-size:12px}
+.spb{width:160px;height:4px;border-radius:9px;background:#fff3;overflow:hidden;margin-top:14px}.spb i{display:block;height:100%;width:0;background:#f59e0b;animation:ld 2.6s linear forwards}
+.sp{fill:none;stroke:#fff;stroke-width:4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:300;stroke-dashoffset:300;animation:dr 1.1s .2s ease forwards}
+.ring{fill:none;stroke:#f59e0b;stroke-width:2;transform-origin:60px 60px;animation:rg 1.8s ease-out infinite}
+@keyframes dr{to{stroke-dashoffset:0}}@keyframes su{from{opacity:0;transform:translateY(12px)}}@keyframes ld{to{width:100%}}@keyframes rg{from{transform:scale(.7);opacity:.9}to{transform:scale(1.15);opacity:0}}
+@media(prefers-reduced-motion:reduce){.sp{stroke-dashoffset:0}.spb i{width:100%}}
+.src{margin-top:8px;display:flex;flex-direction:column;gap:5px}.src b{font-size:12px;color:var(--mu)}
+.src a{display:flex;gap:8px;align-items:center;text-decoration:none;color:var(--tx);border:1px solid var(--bd);background:var(--bg);border-radius:10px;padding:6px 8px;font-size:13px}
+.src a i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--pr);color:var(--pt);font:700 11px/20px system-ui;text-align:center}
+.src small{display:block;color:var(--mu);font-size:11px}
+a.cit{display:inline-block;min-width:16px;height:16px;border-radius:8px;background:var(--pr);color:var(--pt);font:700 10px/16px system-ui;text-align:center;text-decoration:none;margin:0 1px;vertical-align:super}
+.vb{margin-top:8px;font-size:13px;border-radius:10px;padding:6px 10px;border:1px solid var(--bd);color:var(--mu)}.vb.ok{border-color:var(--ok);color:var(--ok)}.vb.wr{border-color:var(--wr);color:var(--wr)}.vb summary{cursor:pointer;font-weight:600}.vb p{margin:4px 0 0;color:var(--tx)}
+.row textarea{max-height:45vh;line-height:1.4}.row textarea.tall{min-height:40vh;max-height:72vh}.ib.xp{font-size:15px}
+</style></head><body>
+<div id="splash" onclick="this.classList.add('out')"><svg viewBox="0 0 120 120" width="120" height="120" aria-hidden="true"><circle class="ring" cx="60" cy="60" r="54"/><path class="sp" d="M60 34 102 54 60 74 18 54Z"/><path class="sp" d="M38 65v17c0 8 44 8 44 0V65"/><path class="sp" d="M102 54v26"/></svg><h1>AI Teaching Assistant</h1><p>Plan, teach and assess in Hindi or English</p><div class="spb"><i></i></div><small>Tap to skip</small></div>
+
+<header><h1>🎓 AI Teaching Assistant</h1><button class="btn s sm" id="hiB" title="History">🕘</button><button class="btn s sm" id="thB" title="Themes">🎨</button><button class="btn s sm" id="setB">⚙ Class</button></header>
+<main>
+<section class="pg on" id="home"><div class="hero"><h2 id="hg">Hello! 👋</h2><p id="hs"></p></div>
+<div class="tg">
+<button class="tile" onclick="quick('Lesson plan')"><b>📘</b>Lesson plan<br><span>Objectives, steps, assessment</span></button>
+<button class="tile" onclick="quick('learn')"><b>🧠</b>Play a quiz<br><span>Interactive MCQs</span></button>
+<button class="tile" onclick="quick('Explain')"><b>💡</b>Explain a topic<br><span>Simple, with examples</span></button>
+<button class="tile" onclick="quick('Activity')"><b>🎯</b>Class activity<br><span>Ideas with timing</span></button>
+<button class="tile" onclick="quick('check')"><b>✅</b>Check copies<br><span>Marks and feedback</span></button>
+<button class="tile" onclick="quick('studio')"><b>🎨</b>Visual studio<br><span>Images, videos, infographics</span></button>
+<button class="tile" onclick="quick('learn')"><b>🃏</b>Flashcards and timer<br><span>Revision and class tools</span></button>
+<button class="tile" onclick="quick('chat')"><b>💬</b>Ask the AI<br><span>Upload PDFs, photos, videos</span></button></div>
+<div class="card"><h2>Recent work</h2><div id="hr"></div></div></section>
+<section class="pg" id="chat"><div id="msgs"></div>
+<div class="bar"><div class="chips" id="qc"></div><div class="att" id="att"></div>
+<div class="row"><button class="ib" id="clip" title="Attach PDF, image or video">📎</button><button class="ib" id="pdfB" title="Upload a PDF">📄</button><button class="ib" id="mic" title="Dictate" hidden>🎤</button><textarea id="inp" rows="1" placeholder="Ask anything: type, or tap 🎤 and speak Hindi or English"></textarea><button class="btn" id="send">Send</button></div>
+<input type="file" id="fl" hidden multiple accept="image/*,application/pdf,video/*"><input type="file" id="flp" hidden multiple accept="application/pdf"></div></section>
+
+<section class="pg" id="tools"><div class="card"><h2>Create teaching material</h2>
+<div class="chips" id="tk"></div>
+<label>Topic / chapter</label><input id="tTopic" placeholder="e.g. Photosynthesis">
+<div class="g2"><div><label>Duration / length</label><input id="tDur" placeholder="40 minutes"></div><div><label>Difficulty</label><select id="tDif"><option>Mixed (easy, medium, hard)</option><option>Easy</option><option>Medium</option><option>Hard</option></select></div></div>
+<label>Format, marking scheme, number of questions, extra notes</label><textarea class="f" id="tNote" rows="2" placeholder="e.g. 10 MCQs + 3 short answers, 1 mark each"></textarea>
+<label>Reference material (optional: PDF, image, video)</label><input type="file" id="tFile" multiple accept="image/*,application/pdf,video/*">
+<div class="tb"><button class="btn" id="tGo">Generate</button></div><div id="tOut"></div></div></section>
+
+<section class="pg" id="check"><div class="card"><h2>Check copies and award marks</h2>
+<p class="note">Upload photos or PDFs of student answer sheets. AI marks are a draft: review and edit every score.</p>
+<label>Question paper / answer key / marking scheme (text)</label><textarea class="f" id="cKey" rows="4" placeholder="Paste questions with model answers and marks. Or upload them below."></textarea>
+<label>Answer sheets (images, PDF)</label><input type="file" id="cFile" multiple accept="image/*,application/pdf">
+<label>Key or question paper as file (optional)</label><input type="file" id="cKeyF" multiple accept="image/*,application/pdf">
+<div class="g2"><div><label>Student name / roll no</label><input id="cName"></div><div><label>Strictness</label><select id="cStr"><option>Balanced</option><option>Lenient (give partial credit)</option><option>Strict</option></select></div></div>
+<div class="tb"><button class="btn" id="cGo">Check and mark</button></div><div id="cOut"></div></div></section>
+
+<section class="pg" id="studio"><div class="card"><h2>Visual studio</h2>
+<div class="chips" id="sk"></div>
+<label>What should it show?</label><textarea class="f" id="sTxt" rows="3" placeholder="e.g. Water cycle for Class 5, with labels"></textarea>
+<label>Source PDF or image (optional)</label><input type="file" id="sFile" accept="application/pdf,image/*"><div class="tb"><button class="btn" id="sGo">Create</button></div><div id="sOut" class="vis"></div></div></section>
+
+<section class="pg" id="plan"><div class="back" onclick="go('more')">‹ More</div><div class="card"><h2>Syllabus tracker</h2>
+<label>Topics with status (one per line: Topic - done / doing / pending)</label><textarea class="f" id="pTop" rows="5" placeholder="Fractions - done&#10;Decimals - doing&#10;Geometry - pending"></textarea>
+<div class="g2"><div><label>Weeks left</label><input id="pWk" type="number" value="8"></div><div><label>Periods per week</label><input id="pPer" type="number" value="5"></div></div>
+<div class="tb"><button class="btn" id="pGo">Organise and plan</button></div><div id="pOut"></div></div>
+<div class="card"><h2>Progress report</h2>
+<label>Assessment data (paste scores) or upload a mark sheet</label><textarea class="f" id="rDat" rows="4" placeholder="Asha: Unit1 18/20, Unit2 12/20&#10;Ravi: Unit1 9/20, Unit2 15/20"></textarea>
+<input type="file" id="rFile" multiple accept="image/*,application/pdf" style="margin-top:6px">
+<div class="tb"><button class="btn" id="rGo">Generate reports</button></div><div id="rOut"></div></div></section>
+<section class="pg" id="more"><div class="card"><h2>More tools</h2>
+<button class="tile" onclick="go('plan')"><b>📊</b>Syllabus tracker and reports<br><span>Plan coverage, progress reports</span></button>
+<button class="tile" onclick="go('learn')"><b>🧠</b>Learn tools<br><span>Quiz player, flashcards, class timer</span></button>
+<button class="tile" onclick="go('lib')"><b>🕘</b>History<br><span>All chats and creations: open, download, delete</span></button>
+<button class="tile" onclick="$('#thB').click()"><b>🎨</b>Appearance<br><span>Themes and text size</span></button>
+<button class="tile" onclick="$('#setB').click()"><b>⚙</b>Teacher setup<br><span>Institution, course, branch, subject</span></button></div></section>
+<section class="pg" id="learn"><div class="back" onclick="go('more')">‹ More</div>
+<div class="card"><h2>Interactive quiz</h2><label>Topic</label><input id="qzT" placeholder="e.g. Newton\u2019s laws"><div class="g2"><div><label>Questions</label><select id="qzN"><option>5</option><option>8</option><option>10</option></select></div><div><label>Difficulty</label><select id="qzD"><option>Mixed</option><option>Easy</option><option>Medium</option><option>Hard</option></select></div></div><div class="tb"><button class="btn" id="qzGo">Create quiz</button></div><div id="qzOut"></div></div>
+<div class="card"><h2>Flashcards</h2><label>Topic</label><input id="fcT" placeholder="e.g. Parts of a cell"><div class="tb"><button class="btn" id="fcGo">Create cards</button></div><div id="fcOut"></div></div>
+<div class="card"><h2>Class timer</h2><div class="big" id="tmD">05:00</div><div class="tb"><button class="btn s sm tmp" data-m="1">1m</button><button class="btn s sm tmp" data-m="5">5m</button><button class="btn s sm tmp" data-m="10">10m</button><button class="btn s sm tmp" data-m="20">20m</button><input id="tmM" type="number" placeholder="min" style="width:70px"><button class="btn s sm" id="tmC">Set</button></div><div class="tb"><button class="btn" id="tmP">▶ Start</button><button class="btn s" id="tmR">Reset</button></div></div></section>
+<section class="pg" id="lib"><div class="back" onclick="go('more')">‹ More</div><div class="card"><h2>History</h2><input id="lq" placeholder="Search history…"><div class="chips" id="lf" style="margin-top:8px"></div><div id="ll"></div><div class="tb"><button class="btn s sm" id="lclr">🗑 Clear all history</button></div></div></section>
+</main>
+<nav id="nav"><button class="on" data-p="home"><b>🏠</b>Home</button><button data-p="chat"><b>💬</b>Chat</button><button data-p="tools"><b>📝</b>Create</button><button data-p="check"><b>✅</b>Check</button><button data-p="studio"><b>🎨</b>Studio</button><button data-p="more"><b>⋯</b>More</button></nav>
+<div id="toast"></div>
+<dialog id="dlg"><h2 style="font:700 16px Georgia,serif;margin:0 0 6px;color:var(--pr)">Teacher setup</h2>
+<label>Institution type</label><select id="sTyp"><option>School</option><option>College / University</option><option>Other course</option></select><label id="lCls">Class / grade</label><input id="sCls" placeholder="e.g. Class 8"><label id="lBr">Branch / Stream</label><input id="sBr" placeholder="e.g. Computer Science"><label id="lSub">Subject</label><input id="sSub" placeholder="e.g. Data Structures">
+<label>Syllabus / board / learning objectives (optional)</label><textarea class="f" id="sSyl" rows="3"></textarea>
+<label>Language</label><input id="sLng" placeholder="English"><label>AI engine</label><select id="sPrv"><option value="auto">Auto: Puter (free account), then free server</option><option value="puter">Puter only</option><option value="free">Free server only</option></select><label>AI model (optional)</label><input id="sMod" list="mods" placeholder="google/gemini-2.5-flash"><datalist id="mods"><option value="google/gemini-2.5-flash"><option value="nex-agi/nex-n2.5-mini:free"><option value="openai/gpt-5-chat"></datalist><p class="note">AI service: shared free endpoint — no personal API key required. Availability and usage limits may change. Do not upload private student information.</p><div class="tb"><button class="btn" id="sOk">Save</button></div></dialog>
+<dialog id="thm"><h2 style="font:700 16px Georgia,serif;margin:0 0 8px;color:var(--pr)">Appearance</h2><div class="swg" id="swg"></div><label>Text size</label><div class="tb"><button class="btn s sm tz" data-z=".9">A−</button><button class="btn s sm tz" data-z="1">A</button><button class="btn s sm tz" data-z="1.15">A+</button><button class="btn s sm tz" data-z="1.3">A++</button></div><div class="tb"><button class="btn sm" onclick="this.closest('dialog').close()">Done</button></div></dialog>
+<dialog id="lv"><h2 id="lvT" style="font:700 16px Georgia,serif;margin:0 0 6px;color:var(--pr)"></h2><div id="lvB" style="max-height:55vh;overflow:auto"></div><div class="tb"><button class="btn s sm" id="lvC">Copy</button><button class="btn s sm" id="lvP">📄 PDF</button><button class="btn s sm" id="lvR">🔊</button><button class="btn s sm" id="lvD">🗑</button><button class="btn sm" onclick="this.closest('dialog').close()">Close</button></div></dialog>
+<script>
+const $=s=>document.querySelector(s),$$=s=>[...document.querySelectorAll(s)];
+const MODEL="openai-fast";let sample=1,caps={images:{maxCount:20}},dict=null,dl={save:async({filename:f,data:d})=>{const u=URL.createObjectURL(d instanceof Blob?d:new Blob([d])),a=document.createElement("a");a.href=u;a.download=f;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}},S={typ:'School',cls:'',br:'',sub:'',syl:'',lng:''};
+try{S=Object.assign(S,JSON.parse(localStorage.getItem('ata')||'{}'))}catch(e){}
+const esc=t=>t.replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function inl(t){return t.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*\n]+)\*/g,'$1<i>$2</i>').replace(/`([^`]+)`/g,'<code>$1</code>').replace(/(https?:\/\/[^\s<)]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')}
+function md(src){const L=esc(src).split('\n'),o=[];let ul=null,tb=null;const cl=()=>{if(ul){o.push('</'+ul+'>');ul=null}if(tb){o.push('</table></div>');tb=null}};
+for(const l of L){let m;if(/^\s*\|.*\|\s*$/.test(l)){if(/^[\s|:-]+$/.test(l))continue;const c=l.trim().slice(1,-1).split('|').map(x=>inl(x.trim()));if(ul){o.push('</'+ul+'>');ul=null}if(!tb){o.push('<div class="tw"><table>');tb=1;o.push('<tr>'+c.map(x=>'<th>'+x+'</th>').join('')+'</tr>')}else o.push('<tr>'+c.map(x=>'<td>'+x+'</td>').join('')+'</tr>');continue}
+if(tb){o.push('</table></div>');tb=null}
+if(m=l.match(/^#{1,4}\s+(.*)/)){cl();o.push('<h3>'+inl(m[1])+'</h3>')}
+else if(m=l.match(/^\s*[-*•]\s+(.*)/)){if(ul!='ul'){cl();o.push('<ul>');ul='ul'}o.push('<li>'+inl(m[1])+'</li>')}
+else if(m=l.match(/^\s*\d+[.)]\s+(.*)/)){if(ul!='ol'){cl();o.push('<ol>');ul='ol'}o.push('<li>'+inl(m[1])+'</li>')}
+else if(!l.trim())cl();else{cl();o.push('<p>'+inl(l)+'</p>')}}cl();return o.join('')}
+const SYS=()=>`You are an AI Teaching Assistant that helps teachers prepare lesson plans, activities, quizzes, worksheets, notes, explanations, syllabus plans, progress reports and evaluate student work.
+Rules: answer only academic and teaching-related questions; politely redirect anything else. Keep answers short and clear (about 5-10 lines) unless a detailed output (lesson plan, quiz, report) is requested. Never invent facts, references, textbook content or exam rules; state uncertainty plainly. Follow the class level, syllabus and format the teacher gives; do not assume a board or exam pattern without information. If the request is incomplete or unclear, ask one short clarifying question. Use simple, age-appropriate, inclusive language with real-life examples. Encourage understanding and problem solving. Do not ask for unnecessary personal data. Do not promise better marks. When asked for sources or links, give only reliable official sources (boards, government, universities, textbook publishers); link only pages you are confident exist, never invent URLs or citations, otherwise name the source with a search phrase and ask the teacher to verify. When web sources are supplied in the message as [1], [2]..., ground your answer in them and cite them as [n] after the sentences they support; never cite a number that was not supplied. The teacher reviews and decides; you only support. If you cannot do something, say so instead of pretending.
+Context: institution=${S.typ}; ${S.typ=='School'?'class':'course'}=${S.cls||'not given'}; branch/stream=${S.br||'not given'}; subject=${S.sub||'not given'}; syllabus/objectives=${S.syl||'not given'}; reply language=${S.lng||'English'}.
+Output markdown.`;
+const b64=bl=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result.split(',')[1]);f.readAsDataURL(bl)});
+async function ask(input,o={}){
+if(window.puter&&puter.ai&&(localStorage.getItem('ata_prov')||'auto')!=='free'){
+if(!localStorage.getItem('ata_hint')){try{localStorage.setItem('ata_hint','1')}catch(e){}toast('A free Puter sign-in window may appear once. Sign in to use the AI.')}
+try{return await askPuter(input,o)}catch(e){if(o.signal&&o.signal.aborted)throw e;if((localStorage.getItem('ata_prov')||'auto')==='puter')throw new Error('Puter AI failed: '+(e&&(e.message||(e.error&&e.error.message))||'sign-in cancelled or not enough free credit')+'.')}}
+return askFree(input,o)}
+async function askPuter(input,o){const ms=(typeof input=='string'?[{role:'user',content:input}]:input).map(x=>({role:x.role,content:x.content}));
+const im=(o.images||[]).slice(0,20);if(im.length){const l=ms[ms.length-1],parts=[];for(const b of im)parts.push({type:'image_url',image_url:{url:'data:'+(b.type||'image/jpeg')+';base64,'+await b64(b)}});parts.push({type:'text',text:typeof l.content==='string'?l.content:'Please analyse the attached material.'});l.content=parts}
+const model=(localStorage.getItem('ata_model')||'').trim()||'google/gemini-2.5-flash';
+const st=await puter.ai.chat(ms,{model,stream:true,signal:o.signal,max_tokens:o.tier=='complex'?8000:4000});
+let txt='';for await(const part of st){const d=part&&part.text||'';if(d){txt+=d;if(o.el)o.el.innerHTML=md(txt)}}
+if(!txt.trim())throw new Error('empty answer');return txt}
+async function askFree(input,o={}){
+const ms=(typeof input=='string'?[{role:'user',content:input}]:input).map(x=>({role:x.role,content:x.content}));
+const im=(o.images||[]).slice(0,20);
+if(im.length){const l=ms[ms.length-1],parts=[];for(const b of im){const data=await b64(b);parts.push({type:'image_url',image_url:{url:'data:'+(b.type||'image/jpeg')+';base64,'+data}})}parts.push({type:'text',text:typeof l.content==='string'?l.content:'Please analyse the attached material.'});l.content=parts}
+let r;
+try{r=await fetch('https://text.pollinations.ai/openai',{method:'POST',signal:o.signal,headers:{'content-type':'application/json'},body:JSON.stringify({model:MODEL,max_tokens:o.tier=='complex'?8000:4000,stream:false,messages:ms})})}
+catch(e){if(o.signal&&o.signal.aborted)throw e;throw new Error('Free AI server is unreachable right now. Please try again in a little while.')}
+if(!r.ok){let m='Free AI server request failed ('+r.status+').';try{const j=await r.json();m=j.error?.message||j.message||m}catch(e){}if(r.status===429)m='The free AI server is busy or rate-limited. Please wait and try again.';throw new Error(m)}
+let j;try{j=await r.json()}catch(e){throw new Error('The free AI server returned an unreadable response.')}
+const txt=j.choices?.[0]?.message?.content||j.choices?.[0]?.text||j.output_text;
+if(typeof txt!=='string'||!txt.trim())throw new Error('The free AI server returned no text. Try again later.');
+if(o.el)o.el.innerHTML=md(txt);
+return txt
+}
+async function frames(f,n=6){const u=URL.createObjectURL(f),v=document.createElement('video');v.muted=true;v.src=u;await new Promise((r,j)=>{v.onloadedmetadata=r;v.onerror=()=>j(new Error('Cannot read video'))});
+const out=[],d=v.duration||1,c=document.createElement('canvas'),w=Math.min(960,v.videoWidth||960);c.width=w;c.height=Math.round(w*(v.videoHeight||540)/(v.videoWidth||960));
+for(let i=0;i<n;i++){v.currentTime=d*(i+.5)/n;await new Promise(r=>v.onseeked=r);c.getContext('2d').drawImage(v,0,0,c.width,c.height);out.push(await new Promise(r=>c.toBlob(r,'image/jpeg',.75)))}URL.revokeObjectURL(u);return out}
+async function toImgs(files){const out=[];for(const f of files){if(f.type.startsWith('image/'))out.push(f);
+else if(f.type==='application/pdf'){const p=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise;for(let i=1;i<=Math.min(p.numPages,10);i++){const pg=await p.getPage(i),v=pg.getViewport({scale:1.5}),c=document.createElement('canvas');c.width=v.width;c.height=v.height;await pg.render({canvasContext:c.getContext('2d'),viewport:v}).promise;out.push(await new Promise(r=>c.toBlob(r,'image/jpeg',.8)))}}
+else if(f.type.startsWith('video/'))out.push(...await frames(f))}return out}
+const names=fs=>[...fs].map(f=>f.name).join(', ');
+/* nav */
+$$('#nav button').forEach(b=>b.onclick=()=>go(b.dataset.p));
+/* settings */
+const applyType=()=>{const sc=$('#sTyp').value=='School';$('#lCls').textContent=sc?'Class / grade':'Course';$('#sCls').placeholder=sc?'e.g. Class 8':'e.g. B.Tech, BCA, MBA, Diploma';$('#lBr').textContent=sc?'Stream (optional)':'Branch / Stream';$('#sBr').placeholder=sc?'e.g. Science, Commerce, Arts':'e.g. Computer Science, Mechanical';$('#sSub').placeholder=sc?'e.g. Mathematics':'e.g. Data Structures'};$('#sTyp').onchange=applyType;
+$('#setB').onclick=()=>{$('#sTyp').value=S.typ||'School';applyType();$('#sCls').value=S.cls;$('#sBr').value=S.br||'';$('#sSub').value=S.sub;$('#sSyl').value=S.syl;$('#sLng').value=S.lng;$('#sPrv').value=localStorage.getItem('ata_prov')||'auto';$('#sMod').value=localStorage.getItem('ata_model')||'';$('#dlg').showModal()};
+$('#sOk').onclick=()=>{S={typ:$('#sTyp').value,cls:$('#sCls').value,br:$('#sBr').value,sub:$('#sSub').value,syl:$('#sSyl').value,lng:$('#sLng').value};try{localStorage.setItem('ata',JSON.stringify(S))}catch(e){}try{localStorage.setItem('ata_prov',$('#sPrv').value);localStorage.setItem('ata_model',$('#sMod').value.trim())}catch(e){}$('#dlg').close();$('#setB').textContent='⚙ '+(S.cls||'Class')};
+$('#setB').textContent='⚙ '+(S.cls||'Setup');
+if(!S.cls)setTimeout(()=>$('#setB').click(),400);
+/* chat */
+let hist=[],att=[],ctl=null,busy=false;
+const msgs=$('#msgs');
+function bub(c,t){const d=document.createElement('div');d.className='m '+c;d.innerHTML=t;msgs.appendChild(d);msgs.scrollTop=msgs.scrollHeight;return d}
+bub('a',md('Hello! I can plan lessons, make quizzes, explain topics, read **PDFs, images and videos**, check answer sheets and create visuals. Set up your institution, course, branch/stream and subject with ⚙ (you can change it anytime) and ask away.'));
+['Explain photosynthesis simply','Lesson plan: fractions, 40 min','5 MCQs with answer key','Give a fun classroom activity','Trusted source links for this topic'].forEach(t=>{const c=document.createElement('span');c.className='chip';c.textContent=t;c.onclick=()=>{$('#inp').value=t;$('#inp').focus()};$('#qc').appendChild(c)});
+$('#clip').onclick=()=>$('#fl').click();
+$('#fl').onchange=e=>{att=[...e.target.files];$('#att').textContent=att.length?'📎 '+names(att):''};
+$('#inp').oninput=e=>{e.target.style.height='auto';e.target.style.height=Math.min(110,e.target.scrollHeight)+'px'};
+$('#inp').onkeydown=e=>{if(e.key==='Enter'&&!e.shiftKey&&!/Mobi|Android/i.test(navigator.userAgent)){e.preventDefault();send()}};
+$('#send').onclick=()=>busy?(ctl&&ctl.abort()):send();
+async function send(){const t=$('#inp').value.trim();if(!t&&!att.length||busy)return;busy=true;$('#send').textContent='Stop';
+const files=att;att=[];$('#att').textContent='';$('#fl').value='';$('#inp').value='';$('#inp').style.height='auto';
+bub('u',esc(t).replace(/\n/g,'<br>')+(files.length?'<div style="font-size:12px;opacity:.8">📎 '+esc(names(files))+'</div>':''));
+const a=bub('a','<span class="dots"><i></i><i></i><i></i></span>');ctl=new AbortController();
+try{let im=[];if(files.length){a.innerHTML='<i>Reading files…</i>';im=await toImgs(files)}
+const q=(files.length?'[Teacher attached '+im.length+' image(s)/page(s)/video frame(s) from: '+names(files)+'. Analyse them to answer.]\n':'')+(t||'Analyse the attached material and summarise it for teaching.');
+const input=[{role:'user',content:SYS()+'\n\nConversation follows.'},{role:'assistant',content:'Understood.'},...hist,{role:'user',content:q}];
+a.innerHTML='<span class="dots"><i></i><i></i><i></i></span>';const r=await ask(input,{el:a,images:im,signal:ctl.signal});hist.push({role:'user',content:q},{role:'assistant',content:r});hist=hist.slice(-12);const pb=document.createElement('button');pb.className='btn s sm';pb.textContent='Save PDF';pb.onclick=()=>pdfSave(a.innerText,'chat_answer').catch(()=>{});a.appendChild(pb);addAct(a,r);CH.push({u:t,a:r});saveCH()}
+catch(e){if(ctl.signal.aborted)a.innerHTML+='<p class="note">Stopped.</p>';else a.innerHTML='<p class="err">'+esc(e.message||'Something went wrong.')+'</p>'}
+busy=false;$('#send').textContent='Send';msgs.scrollTop=msgs.scrollHeight}
+let micListening=false;
+function setupMic(){
+  const b=$('#mic'),input=$('#inp');if(!b)return;
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  b.hidden=false;b.type='button';
+  const L=document.createElement('button');L.type='button';L.className='ib';L.id='micL';L.style.fontSize='12px';b.after(L);
+  let lang=localStorage.getItem('ata_mic')||'en-IN',rec=null,want=false,base='',fin='';
+  const nm=()=>lang=='hi-IN'?'Hindi':'English';
+  const lab=()=>{L.textContent=lang=='hi-IN'?'हिं':'EN';L.title='Voice language: '+nm()+'. Tap to switch to '+(lang=='hi-IN'?'English':'Hindi')};lab();
+  const show=it=>{input.value=(base+' '+fin+' '+(it||'')).replace(/\s+/g,' ').trim();input.dispatchEvent(new Event('input',{bubbles:true}))};
+  function state(on){micListening=on;b.textContent=on?'⏹':'🎤';b.style.background=on?'#fee2e2':'';b.title=on?'Stop voice input':'Speak in English or Hindi'}
+  function start(){rec=new SR();rec.lang=lang;rec.interimResults=true;rec.continuous=true;
+    rec.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const s=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=(fin?' ':'')+s.trim();else it+=s}show(it)};
+    rec.onerror=e=>{if(e.error==='no-speech'||e.error==='aborted')return;want=false;state(false);toast(e.error==='not-allowed'?'Allow microphone permission for this site.':'Voice input error: '+e.error)};
+    rec.onend=()=>{if(want){try{start()}catch(x){want=false;state(false)}}else state(false)};
+    rec.start()}
+  b.onclick=()=>{if(!SR){toast('Voice input is not supported in this browser. Open this app in Chrome.');return}
+    if(want){want=false;try{rec.stop()}catch(e){}state(false);input.focus();toast('Voice converted to text. Tap Send to ask.');return}
+    base=input.value.trim();fin='';want=true;state(true);
+    try{start();toast('Listening in '+nm()+'. Tap '+(lang=='hi-IN'?'हिं':'EN')+' to switch language anytime.')}catch(e){want=false;state(false);toast('Could not start the microphone. Check permission and use HTTPS.')}};
+  L.onclick=()=>{lang=lang=='hi-IN'?'en-IN':'hi-IN';try{localStorage.setItem('ata_mic',lang)}catch(e){}lab();
+    if(want){base=(base+' '+fin).trim();fin='';try{rec.onend=null;rec.stop()}catch(e){}try{start()}catch(e){want=false;state(false)}toast('Switched to '+nm()+'. Keep speaking.')}
+    else toast('Voice language: '+nm())}
+}
+setupMic();
+async function pdfSaveLatin(text,name){if(!window.jspdf||!dl)return false;const d=new jspdf.jsPDF({unit:'pt',format:'a4'}),w=d.internal.pageSize.getWidth()-80;let y=50;d.setFontSize(11);for(const ln of d.splitTextToSize(text.replace(/[*#`]/g,''),w)){if(y>790){d.addPage();y=50}d.text(ln,40,y);y+=15}return dl.save({filename:name+'.pdf',data:d.output('blob')})}
+/* output box with review tools */
+function outBox(host,name){host.innerHTML='<div class="out"><div class="bd"></div><div class="tb" hidden><button class="btn s sm" data-a="e">✏ Edit</button><button class="btn s sm" data-a="c">Copy</button><button class="btn s sm" data-a="d">Save</button><button class="btn s sm" data-a="p">PDF</button><label style="margin:0;display:flex;gap:4px;align-items:center"><input type="checkbox" style="width:auto" data-a="k"> Teacher approved</label></div><div class="note">AI draft: review and edit before using in class.</div></div>';
+const bd=host.querySelector('.bd'),tb=host.querySelector('.tb');tb.onclick=async e=>{const a=e.target.dataset.a;if(a=='e'){const on=bd.contentEditable!='true';bd.contentEditable=on;e.target.textContent=on?'✔ Done':'✏ Edit'}
+if(a=='c'){try{await navigator.clipboard.writeText(bd.innerText);e.target.textContent='Copied'}catch(x){e.target.textContent='Select and copy'}}
+if(a=='d'){if(dl)dl.save({filename:name+'.md',data:bd.innerText}).catch(()=>{});else e.target.textContent='Unavailable'}
+if(a=='p'){pdfSave(bd.innerText,name).then(ok=>{if(ok===false)e.target.textContent='Unavailable'}).catch(()=>{})}};
+return{bd,done:()=>tb.hidden=false}}
+async function gen(host,prompt,o={}){const b=outBox(host,o.name||'output');b.bd.innerHTML='<i>Working…</i>';try{let im=[];if(o.files&&o.files.length){b.bd.innerHTML='<i>Reading files…</i>';im=await toImgs(o.files)}
+const rr=await ask(SYS()+'\n\n'+prompt+(im.length?'\n[Attached '+im.length+' image(s)/pages are included.]':''),{el:b.bd,images:im,tier:o.tier});b.done();lib(o.name||'output',rr)}catch(e){b.bd.innerHTML='<p class="err">'+esc(e.message||'Failed')+'</p>'}}
+/* tools */
+const TK={'Lesson plan':'Create a structured lesson plan with learning objectives, required materials, time duration, step-by-step teaching procedure with timings, and a short assessment.','Activity':'Suggest 3 creative, interactive classroom activities, each with clear instructions, duration and required materials.','Quiz':'Create a quiz with MCQs (4 options) and short-answer questions at easy, medium and hard levels, followed by an answer key.','Worksheet':'Prepare a worksheet with practice exercises and an answer key.','Study notes':'Write concise study notes with key points and a short summary.','Explain':'Explain the topic in simple language with real-life examples and analogies, in small steps, ending with key points.','Find sources':'Suggest reliable, authentic sources (official syllabus or board pages, textbook publishers, government and university sites) for this topic. Give a link only if it is a well-known official page you are confident exists; never invent URLs. Otherwise name the source and a search phrase. Remind the teacher to verify.','Rubric':'Create a clear assessment rubric with criteria, performance levels and marks, in a table.','Exam paper':'Create a balanced exam paper with sections, marks per question, a time limit and a marking scheme, following the notes given.','Homework':'Create a short homework assignment with clear instructions, estimated time and an answer key.','Parent message':'Write a polite, clear message to parents about the topic or situation given, in simple language.','Differentiated tasks':'Create tasks for three levels (support, core, challenge) on the topic, with answer keys.'};
+let tkSel='Lesson plan';
+function chips(id,list,cb,init){const h=$(id);list.forEach(k=>{const c=document.createElement('span');c.className='chip'+(k==init?' on':'');c.textContent=k;c.onclick=()=>{[...h.children].forEach(x=>x.classList.toggle('on',x==c));cb(k)};h.appendChild(c)})}
+chips('#tk',Object.keys(TK),k=>tkSel=k,tkSel);
+$('#tGo').onclick=()=>{const t=$('#tTopic').value.trim();if(!t&&!$('#tFile').files.length)return $('#tOut').innerHTML='<p class="err">Please enter a topic or attach reference material.</p>';
+gen($('#tOut'),TK[tkSel]+'\nTopic: '+(t||'as in the attached material')+'\nDuration/length: '+($('#tDur').value||'not given')+'\nDifficulty: '+$('#tDif').value+'\nTeacher notes: '+($('#tNote').value||'none')+'\nFollow the class level and syllabus in the context. If key details are missing, state your assumptions briefly at the top.',{files:[...$('#tFile').files],name:tkSel.replace(/ /g,'_')})};
+/* copy checking */
+function pj(t){t=t.replace(/```json|```/g,'');const a=t.indexOf('{'),b=t.lastIndexOf('}');return JSON.parse(t.slice(a,b+1))}
+$('#cGo').onclick=async()=>{const h=$('#cOut'),fs=[...$('#cFile').files];if(!fs.length)return h.innerHTML='<p class="err">Please upload the answer sheet.</p>';
+h.innerHTML='<p><i>Reading and marking… this can take a minute.</i></p>';
+try{const ks=await toImgs([...$('#cKeyF').files]),as=await toImgs(fs);
+const p=SYS()+'\n\nTASK: Evaluate the student answer sheet. The first '+ks.length+' image(s) (if any) are the question paper/answer key; the remaining '+as.length+' are the student\'s answer sheet.\nQuestion paper / key / marking scheme from teacher:\n'+($('#cKey').value||'(see images)')+'\nStrictness: '+$('#cStr').value+'. Student: '+($('#cName').value||'unknown')+'.\nMark only what is written; use the teacher\'s marking scheme and marks. Do not guess illegible writing: set review=true and explain. Reply with ONLY JSON: {"student":"","questions":[{"q":"1","awarded":0,"max":0,"feedback":"short, constructive, basis of marking","review":false,"reason":""}],"overall":"2-3 lines of feedback and next steps"}';
+const r=await ask(p,{images:[...ks,...as],tier:'complex'});const d=pj(r);saveCheck(d);
+h.innerHTML='<div class="out"><b>'+esc(d.student||$('#cName').value||'Student')+'</b><div class="tw"><table id="ct"><tr><th>Q</th><th>Marks</th><th>Feedback</th></tr>'+(d.questions||[]).map(q=>'<tr><td>'+esc(String(q.q))+'</td><td><input type="number" step="0.5" value="'+(+q.awarded||0)+'"> / <span class="mx">'+(+q.max||0)+'</span></td><td>'+esc(q.feedback||'')+(q.review?'<div class="fl">⚠ Manual review: '+esc(q.reason||'')+'</div>':'')+'</td></tr>').join('')+'</table></div><p><b id="tot"></b></p><p>'+esc(d.overall||'')+'</p><div class="tb"><button class="btn s sm" id="csv">Save CSV</button><button class="btn s sm" id="cpdf">📄 PDF</button></div><p class="note">AI-suggested marks. Final grading decision is the teacher\'s.</p></div>';
+const upd=()=>{let a=0,m=0;$$('#ct tr').forEach((r,i)=>{if(!i)return;a+=+r.querySelector('input').value||0;m+=+r.querySelector('.mx').textContent});$('#tot').textContent='Total: '+a+' / '+m};upd();$$('#ct input').forEach(i=>i.oninput=upd);
+$('#csv').onclick=()=>{const rows=[['Question','Awarded','Max','Feedback']];$$('#ct tr').forEach((r,i)=>{if(i)rows.push([r.cells[0].textContent,r.querySelector('input').value,r.querySelector('.mx').textContent,r.cells[2].textContent])});if(dl)dl.save({filename:'marks.csv',data:rows.map(r=>r.map(x=>'"'+String(x).replace(/"/g,'""')+'"').join(',')).join('\n')}).catch(()=>{})}}
+catch(e){h.innerHTML='<p class="err">'+esc(e.message||'Could not mark this sheet. Try a clearer photo.')+'</p>'}};
+/* studio */
+let sk='Image';chips('#sk',['Image','Infographic','Animated explainer video',...(window.puter?['AI picture']:[])],k=>sk=k,sk);
+const svgUrl=s=>URL.createObjectURL(new Blob([s],{type:'image/svg+xml'}));
+function getSvg(t){const m=t.match(/<svg[\s\S]*<\/svg>/i);return m?m[0].replace(/<script[\s\S]*?<\/script>/gi,'').replace(/\son\w+="[^"]*"/gi,''):null}
+$('#sGo').onclick=async()=>{const h=$('#sOut'),t=$('#sTxt').value.trim()||($('#sFile').files.length?'the attached material':'');if(!t)return h.innerHTML='<p class="err">Describe what to create.</p>';h.innerHTML='<p><i>Creating…</i></p>';
+const ctx='Level: '+(S.cls||'general')+'. Branch/stream: '+(S.br||'n/a')+'. Subject: '+(S.sub||'general')+'. Topic: '+t+'. Use clear labels, large readable text, accurate facts, kid-friendly colours, no external images or fonts.';
+try{if(sk=='AI picture'){await aiPic(h,t);return}if(sk!='Animated explainer video'){const w=sk=='Infographic'?'viewBox="0 0 800 1100"':'viewBox="0 0 800 600"';
+const r=await ask(ctx+'\nCreate a '+sk.toLowerCase()+' as ONE self-contained SVG ('+w+'), subtle SMIL/CSS animation allowed, no scripts. Reply with only the SVG code.',{tier:'complex',images:await srcImgs()});const s=getSvg(r);if(!s)throw new Error('Could not create the graphic. Please try again.');
+showVisual(h,s,t,sk,true)}
+else{const r=await ask(ctx+'\nCreate an animated explainer video of 4-6 scenes. Reply with ONLY JSON: {"title":"","scenes":[{"caption":"short heading","narration":"1-2 simple sentences","svg":"self-contained SVG viewBox 0 0 800 450 with SMIL animation, no scripts"}]}',{tier:'complex',images:await srcImgs()});
+const d=pj(r),sc=(d.scenes||[]).map(x=>({...x,s:getSvg(x.svg||'')})).filter(x=>x.s);if(!sc.length)throw new Error('Could not create the video. Please try again.');player(h,d.title,sc);addHist({type:'video',k:'Animated video',t:'Video: '+(d.title||t).slice(0,50),scenes:sc.map(x=>({caption:x.caption,narration:x.narration,s:x.s}))})}}
+catch(e){h.innerHTML='<p class="err">'+esc(e.message||'Failed')+'</p>'}};
+let pt=null;function player(h,title,sc){clearTimeout(pt);let i=0,pl=false,nr=true;h.innerHTML='<div class="cap">'+esc(title||'Explainer')+'</div><img id="pi" alt=""><div class="cap" id="pc"></div><div id="pn" style="font-size:14px"></div><div class="prog"><i id="pb"></i></div><div class="tb"><button class="btn sm" id="pp">▶ Play</button><button class="btn s sm" id="pr">⏮ Restart</button><label style="margin:0;display:flex;gap:4px;align-items:center"><input type="checkbox" style="width:auto" id="pv" checked> Narration</label></div><div class="tb"><button class="btn s sm" id="vdl">⬇ Video (.webm)</button><button class="btn s sm" id="vpdf">⬇ Storyboard PDF</button></div><p class="note">AI-generated animation: review before class. The downloaded video has captions but no voice.</p>';
+const show=()=>{const x=sc[i];$('#pi').src=svgUrl(x.s);$('#pc').textContent=(i+1)+'/'+sc.length+' · '+(x.caption||'');$('#pn').textContent=x.narration||'';$('#pb').style.width=((i+1)/sc.length*100)+'%'};
+const step=()=>{if(!pl)return;show();const x=sc[i],ms=Math.max(4000,(x.narration||'').split(' ').length*420);
+if($('#pv').checked&&window.speechSynthesis){try{speakText(x.narration||'')}catch(e){}}
+pt=setTimeout(()=>{if(i<sc.length-1){i++;step()}else{pl=false;$('#pp').textContent='▶ Replay';i=0}},ms)};
+$('#pp').onclick=()=>{pl=!pl;$('#pp').textContent=pl?'⏸ Pause':'▶ Play';clearTimeout(pt);try{speechSynthesis.cancel()}catch(e){}if(pl)step()};
+$('#pr').onclick=()=>{clearTimeout(pt);try{speechSynthesis.cancel()}catch(e){}i=0;pl=true;$('#pp').textContent='⏸ Pause';step()};show();bindVid(h,title,sc)}
+async function aiPic(h,t){if(!(window.puter&&puter.ai&&puter.ai.txt2img))throw new Error('AI pictures need the Puter service (internet and a free Puter sign-in).');
+const el=await puter.ai.txt2img('Clear educational illustration for '+(S.cls||'students')+': '+t);el.style.width='100%';el.style.borderRadius='10px';h.innerHTML='';h.appendChild(el);picActions(h,el,t)}
+/* planner & reports */
+$('#pGo').onclick=()=>{const t=$('#pTop').value.trim();if(!t)return $('#pOut').innerHTML='<p class="err">Add your topics first.</p>';
+gen($('#pOut'),'Organise these syllabus topics into Completed, In progress and Pending (show a short table with counts and % coverage), then suggest a realistic week-by-week completion plan for '+$('#pWk').value+' weeks at '+$('#pPer').value+' periods/week, with revision buffer. Flag if the plan is unrealistic.\nTopics:\n'+t,{name:'syllabus_plan'})};
+$('#rGo').onclick=()=>{const d=$('#rDat').value.trim(),f=[...$('#rFile').files];if(!d&&!f.length)return $('#rOut').innerHTML='<p class="err">Paste scores or upload a mark sheet.</p>';
+gen($('#rOut'),'Generate a student progress report for each student from this assessment data: performance summary, strengths, areas for improvement, and 2-3 actionable next steps. Use only the data given; do not invent scores. End with a short class-level summary.\nData:\n'+(d||'(see attached)'),{files:f,name:'progress_reports',tier:'complex'})};
+/* v2 features */
+const dots='<span class="dots"><i></i><i></i><i></i></span>';
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('on'),2000)}
+function go(id){$$('.pg').forEach(p=>p.classList.toggle('on',p.id==id));const nb=['plan','learn','lib'].includes(id)?'more':id;$$('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.p==nb));try{navigator.vibrate&&navigator.vibrate(8)}catch(e){}if(id=='home')home();if(id=='lib')renderLib();if(id=='chat')msgs.scrollTop=msgs.scrollHeight}
+function quick(k){if(['chat','check','studio','learn','plan'].includes(k)){go(k);return}go('tools');[...$('#tk').children].forEach(c=>{if(c.textContent==k)c.click()});setTimeout(()=>$('#tTopic').focus(),60)}
+function speak(t){try{if(speechSynthesis.speaking){speechSynthesis.cancel();return}speechSynthesis.speak(new SpeechSynthesisUtterance(t.replace(/[*#`|]/g,' ')))}catch(e){toast('Read aloud is unavailable')}}
+/* themes */
+const TH=[['auto','Auto','linear-gradient(135deg,#f6f8f9 50%,#10181c 50%)'],['light','Light','#8a9aa3'],['dark','Dark','#10181c'],['midnight','Midnight','linear-gradient(135deg,#0b1020 50%,#8ab4ff 50%)'],['ocean','Ocean','linear-gradient(135deg,#0369a1 50%,#06b6d4 50%)'],['forest','Forest','linear-gradient(135deg,#166534 50%,#eab308 50%)'],['sunset','Sunset','linear-gradient(135deg,#c2410c 50%,#f59e0b 50%)'],['royal','Royal','linear-gradient(135deg,#6d28d9 50%,#f472b6 50%)'],['contrast','High contrast','linear-gradient(135deg,#000 50%,#ffbf00 50%)']];
+function applyTheme(t){const r=document.documentElement;if(t=='auto')r.removeAttribute('data-theme');else r.setAttribute('data-theme',t);try{localStorage.setItem('ata_th',t)}catch(e){}$$('.sw').forEach(x=>x.classList.toggle('on',x.dataset.t==t))}
+function applyZoom(z){document.documentElement.style.setProperty('--fz',z);try{localStorage.setItem('ata_fz',z)}catch(e){}}
+TH.forEach(t=>{const b=document.createElement('button');b.className='sw';b.dataset.t=t[0];b.style.background=t[2];b.textContent=t[1];b.onclick=()=>applyTheme(t[0]);$('#swg').appendChild(b)});
+$$('.tz').forEach(b=>b.onclick=()=>applyZoom(b.dataset.z));
+$('#thB').onclick=()=>$('#thm').showModal();
+try{applyTheme(localStorage.getItem('ata_th')||'auto');applyZoom(localStorage.getItem('ata_fz')||'1')}catch(e){applyTheme('auto')}
+/* library */
+const LIB=()=>{try{return JSON.parse(localStorage.getItem('ata_lib')||'[]')}catch(e){return[]}};
+function lib(k,c){try{c=c||'';const a=LIB(),t=(c.split('\n').find(l=>l.trim())||k).replace(/[#*`]/g,'').trim().slice(0,70);a.unshift({id:Date.now(),k:String(k).replace(/_/g,' '),t,c,d:new Date().toLocaleDateString()});localStorage.setItem('ata_lib',JSON.stringify(a.slice(0,60)));toast('Saved to Library ✓')}catch(e){}}
+function libRow(x,h){const d=document.createElement('div');d.className='tile';d.innerHTML='<b style="font-size:14px">'+esc(x.t)+'</b><span>'+esc(x.k)+' · '+x.d+'</span>';d.onclick=()=>openLib(x);h.appendChild(d)}
+function renderLib(){const q=($('#lq').value||'').toLowerCase(),a=LIB().filter(x=>(x.t+x.k+x.c).toLowerCase().includes(q));$('#ll').innerHTML=a.length?'':'<p class="note">Nothing saved yet. Everything you generate is saved here.</p>';a.forEach(x=>libRow(x,$('#ll')))}
+$('#lq').oninput=renderLib;
+function openLib(x){$('#lvT').textContent=x.t;$('#lvB').innerHTML=md(x.c);$('#lv').showModal();$('#lvC').onclick=()=>navigator.clipboard.writeText(x.c).then(()=>toast('Copied'),()=>toast('Select and copy'));$('#lvP').onclick=()=>pdfSave(x.c,'library_item').catch(()=>{});$('#lvR').onclick=()=>speak(x.c);$('#lvD').onclick=()=>{try{localStorage.setItem('ata_lib',JSON.stringify(LIB().filter(y=>y.id!=x.id)))}catch(e){}$('#lv').close();renderLib();home();toast('Deleted')}}
+function home(){const h=new Date().getHours();$('#hg').textContent=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+'! 👋';$('#hs').textContent=[S.typ,S.cls,S.br,S.sub].filter(Boolean).join(' · ')||'Tap ⚙ to set your course, branch and subject';const a=LIB().slice(0,3);$('#hr').innerHTML=a.length?'':'<p class="note">Your recent work will appear here.</p>';a.forEach(x=>libRow(x,$('#hr')))}
+/* chat history */
+let CH=[];try{CH=JSON.parse(localStorage.getItem('ata_ch')||'[]')}catch(e){}
+const saveCH=()=>{try{localStorage.setItem('ata_ch',JSON.stringify(CH.slice(-20)))}catch(e){}};
+function addAct(a,r){const w=document.createElement('div');w.className='tb';w.innerHTML='<button class="btn s sm">🔊</button><button class="btn s sm">📋</button>';w.children[0].onclick=()=>speak(r);w.children[1].onclick=()=>navigator.clipboard.writeText(r).then(()=>toast('Copied'),()=>toast('Select and copy'));a.appendChild(w)}
+CH.forEach(x=>{if(x.u)bub('u',esc(x.u).replace(/\n/g,'<br>'));const b=bub('a',md(x.a));addAct(b,x.a);hist.push({role:'user',content:x.u||'(file)'},{role:'assistant',content:x.a})});hist=hist.slice(-12);
+(function(){const c=document.createElement('span');c.className='chip';c.textContent='🗑 New chat';c.onclick=()=>{archiveChat();CH=[];saveCH();hist=[];msgs.innerHTML='';bub('a',md('New chat started. How can I help?'));toast('Chat cleared')};$('#qc').prepend(c)})();
+/* quiz player */
+const qzMd=(q,t)=>'## Quiz: '+t+'\n\n'+q.map((x,i)=>(i+1)+'. '+x.q+'\n'+x.options.map((o,j)=>'ABCD'[j]+') '+o).join('\n')+'\n**Answer: '+'ABCD'[x.answer]+'** — '+(x.explain||'')).join('\n\n');
+let QZ=null;
+$('#qzGo').onclick=async()=>{const h=$('#qzOut'),t=$('#qzT').value.trim();if(!t)return h.innerHTML='<p class="err">Enter a topic.</p>';h.innerHTML=dots;
+try{const r=await ask(SYS()+'\n\nCreate a multiple-choice quiz for interactive play. Topic: '+t+'. Number of questions: '+$('#qzN').value+'. Difficulty: '+$('#qzD').value+'. Follow the class level and syllabus context. Reply with ONLY JSON: {"questions":[{"q":"","options":["","","",""],"answer":0,"explain":"one short line"}]}',{tier:'complex'});
+const d=pj(r);if(!d.questions||!d.questions.length)throw new Error('Could not build the quiz. Please try again.');QZ={q:d.questions,i:0,s:0};addHist({type:'quiz',k:'Quiz',t:'Quiz: '+t,c:qzMd(d.questions,t),q:d.questions});qz()}catch(e){h.innerHTML='<p class="err">'+esc(e.message||'Failed')+'</p>'}};
+function qz(){const h=$('#qzOut'),Q=QZ;if(Q.i>=Q.q.length){const p=Math.round(Q.s/Q.q.length*100);h.innerHTML='<div class="res"><div class="big">'+Q.s+' / '+Q.q.length+'</div><p>'+(p>=80?'Excellent work! 🎉':p>=50?'Good effort! Review the ones you missed. 👍':'Keep practising, you will get there! 💪')+'</p><button class="btn" id="qzR">Try again</button></div>';$('#qzR').onclick=()=>{Q.i=0;Q.s=0;qz()};return}
+const x=Q.q[Q.i];h.innerHTML='<div class="prog"><i style="width:'+(Q.i/Q.q.length*100)+'%"></i></div><p class="cap">Question '+(Q.i+1)+' of '+Q.q.length+'</p><p>'+esc(x.q)+'</p>'+x.options.map((o,j)=>'<button class="opt" data-j="'+j+'">'+'ABCD'[j]+'. '+esc(o)+'</button>').join('')+'<div id="qzE"></div>';
+$$('#qzOut .opt').forEach(b=>b.onclick=()=>{const j=+b.dataset.j;$$('#qzOut .opt').forEach(o=>{o.disabled=true;if(+o.dataset.j==x.answer)o.classList.add('ok')});if(j==x.answer)Q.s++;else b.classList.add('bad');$('#qzE').innerHTML='<p style="font-size:14px">'+esc(x.explain||'')+'</p><button class="btn" id="qzX">'+(Q.i+1<Q.q.length?'Next ›':'See score')+'</button>';$('#qzX').onclick=()=>{Q.i++;qz()}})}
+/* flashcards */
+let FC=null;
+$('#fcGo').onclick=async()=>{const h=$('#fcOut'),t=$('#fcT').value.trim();if(!t)return h.innerHTML='<p class="err">Enter a topic.</p>';h.innerHTML=dots;
+try{const r=await ask(SYS()+'\n\nCreate 10 revision flashcards on: '+t+'. Follow the class level and syllabus context. Keep each side short. Reply with ONLY JSON: {"cards":[{"front":"","back":""}]}',{tier:'complex'});const d=pj(r);if(!d.cards||!d.cards.length)throw new Error('Could not build the cards. Please try again.');FC={c:d.cards,i:0};addHist({type:'cards',k:'Flashcards',t:'Flashcards: '+t,c:'## Flashcards: '+t+'\n\n'+d.cards.map(x=>'**'+x.front+'** — '+x.back).join('\n\n'),cards:d.cards});fc()}catch(e){h.innerHTML='<p class="err">'+esc(e.message||'Failed')+'</p>'}};
+function fc(){const x=FC.c[FC.i];$('#fcOut').innerHTML='<p class="cap">Card '+(FC.i+1)+' of '+FC.c.length+' · tap to flip</p><div class="fcard" id="fcc"><div class="fin"><div class="ff">'+esc(x.front)+'</div><div class="fb">'+esc(x.back)+'</div></div></div><div class="tb"><button class="btn s sm" id="fp">‹ Prev</button><button class="btn s sm" id="fs">🔀 Shuffle</button><button class="btn s sm" id="fn">Next ›</button></div>';$('#fcc').onclick=()=>$('#fcc').classList.toggle('flip');$('#fp').onclick=()=>{FC.i=(FC.i-1+FC.c.length)%FC.c.length;fc()};$('#fn').onclick=()=>{FC.i=(FC.i+1)%FC.c.length;fc()};$('#fs').onclick=()=>{FC.c.sort(()=>Math.random()-.5);FC.i=0;fc()}}
+/* class timer */
+let tmI=null,tmL=300;const tmF=v=>String(Math.floor(v/60)).padStart(2,'0')+':'+String(v%60).padStart(2,'0'),tmShow=()=>$('#tmD').textContent=tmF(tmL);
+function tmBeep(){try{const c=new(window.AudioContext||window.webkitAudioContext)();[0,.4,.8].forEach(t=>{const o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.frequency.value=880;g.gain.value=.2;o.start(c.currentTime+t);o.stop(c.currentTime+t+.25)})}catch(e){}}
+function tmSet(m){clearInterval(tmI);tmI=null;tmL=m*60;$('#tmP').textContent='▶ Start';tmShow()}
+$$('.tmp').forEach(b=>b.onclick=()=>tmSet(+b.dataset.m));
+$('#tmP').onclick=()=>{if(tmI){clearInterval(tmI);tmI=null;$('#tmP').textContent='▶ Resume';return}if(tmL<=0)tmSet(5);$('#tmP').textContent='⏸ Pause';tmI=setInterval(()=>{tmL--;tmShow();if(tmL<=0){clearInterval(tmI);tmI=null;$('#tmP').textContent='▶ Start';tmBeep();toast('⏱ Time is up!');try{navigator.vibrate([200,100,200])}catch(e){}}},1000)};
+$('#tmR').onclick=()=>tmSet(5);$('#tmC').onclick=()=>{const m=+$('#tmM').value;if(m>0)tmSet(m)};
+const ICON={chat:'💬',doc:'📄',quiz:'🧠',cards:'🃏',visual:'🖼️',pic:'🖼️',video:'🎬',check:'✅'};
+let HF='All';const HM={All:null,Chats:['chat'],Documents:['doc','cards'],Quizzes:['quiz'],Visuals:['visual','pic'],Videos:['video'],Checks:['check']};
+const srcImgs=async()=>{const f=[...$('#sFile').files];return f.length?await toImgs(f):undefined};
+tmShow();home();
+
+if('serviceWorker' in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('sw.js').catch(()=>{});
+
+/* ===== v5: history, downloads, uploads ===== */
+$('#hiB').onclick=()=>go('lib');
+$('#pdfB').onclick=()=>$('#flp').click();
+$('#flp').onchange=e=>{att=[...att,...e.target.files];$('#att').textContent='📎 '+names(att);e.target.value=''};
+/* Unicode-safe PDF (Hindi etc.) */
+async function pdfSave(text,name){if(!window.jspdf||!dl)return false;const clean=text.replace(/[*#`|]/g,'');
+if(!/[^\x00-\xff\u2018-\u201d\u2022\u2013\u2014\u2026]/.test(clean))return pdfSaveLatin(text,name);
+const d=new jspdf.jsPDF({unit:'pt',format:'a4'}),PW=595,PH=842,M=40,SC=2,lh=19;
+const mk=()=>{const c=document.createElement('canvas');c.width=PW*SC;c.height=PH*SC;const x=c.getContext('2d');x.scale(SC,SC);x.fillStyle='#fff';x.fillRect(0,0,PW,PH);x.fillStyle='#111';x.font='13px "Noto Sans Devanagari",Mangal,system-ui,sans-serif';x.textBaseline='top';return[c,x]};
+let[c,x]=mk(),y=M,first=true;const flush=()=>{if(!first)d.addPage();first=false;d.addImage(c.toDataURL('image/jpeg',.9),'JPEG',0,0,PW,PH)};
+for(const raw of clean.split('\n')){let line='';const lines=[];for(const w of raw.split(/(\s+)/)){const tt=line+w;if(x.measureText(tt).width>PW-2*M&&line){lines.push(line);line=w.trimStart()}else line=tt}lines.push(line);
+for(const l of lines){if(y>PH-M){flush();[c,x]=mk();y=M}x.fillText(l,M,y);y+=lh}}
+flush();await dl.save({filename:name+'.pdf',data:d.output('blob')});return true}
+/* SVG helpers and downloads */
+function vbox(s){const m=s.match(/viewBox="([\d.\s-]+)"/);if(!m)return[800,600];const a=m[1].trim().split(/\s+/).map(Number);return[a[2]||800,a[3]||600]}
+function sized(s){const[w,h]=vbox(s);return s.replace(/<svg\b([^>]*)>/i,(m,a)=>'<svg'+a.replace(/\s(width|height)="[^"]*"/g,'')+' width="'+w+'" height="'+h+'">')}
+const loadImg=u=>new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=()=>rej(new Error('Could not render the graphic'));i.src=u});
+async function svgCanvas(s,sc){const[w,h]=vbox(s),img=await loadImg(svgUrl(sized(s))),c=document.createElement('canvas');c.width=w*sc;c.height=h*sc;const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,c.width,c.height);x.drawImage(img,0,0,c.width,c.height);return c}
+const cBlob=(c,t,q)=>new Promise(r=>c.toBlob(r,t,q));
+async function svgPdf(s,n){const c=await svgCanvas(s,2),d=new jspdf.jsPDF({unit:'pt',format:'a4',orientation:c.width>c.height?'l':'p'}),pw=d.internal.pageSize.getWidth(),ph=d.internal.pageSize.getHeight(),k=Math.min((pw-40)/c.width,(ph-40)/c.height);
+d.addImage(c.toDataURL('image/jpeg',.92),'JPEG',(pw-c.width*k)/2,20,c.width*k,c.height*k);await dl.save({filename:n+'.pdf',data:d.output('blob')})}
+function showVisual(h,s,t,type,save){h.innerHTML='<img src="'+svgUrl(s)+'" alt="'+esc(t||'')+'"><div class="tb"><button class="btn s sm" data-d="svg">⬇ SVG</button><button class="btn s sm" data-d="png">⬇ PNG</button><button class="btn s sm" data-d="pdf">⬇ PDF</button></div><p class="note">AI-generated graphic: check accuracy before sharing.</p>';
+h.querySelector('.tb').onclick=async e=>{const k=e.target.dataset.d;if(!k)return;const n=String(type||'visual').toLowerCase().replace(/\W+/g,'_')+'_'+Date.now().toString(36).slice(-4);
+try{if(k=='svg')await dl.save({filename:n+'.svg',data:s});if(k=='png')await dl.save({filename:n+'.png',data:await cBlob(await svgCanvas(s,2),'image/png')});if(k=='pdf')await svgPdf(s,n)}catch(x){toast('Download failed: '+(x.message||'try again'))}};
+if(save)addHist({type:'visual',k:type||'Image',t:(type||'Image')+': '+String(t||'').slice(0,50),svg:s})}
+function imgData(el,w,q){const c=document.createElement('canvas'),W=Math.min(w,el.naturalWidth||w),H=Math.round(W*(el.naturalHeight||W)/(el.naturalWidth||W));c.width=W;c.height=H;c.getContext('2d').drawImage(el,0,0,W,H);return c.toDataURL('image/jpeg',q)}
+function picActions(h,el,t){h.insertAdjacentHTML('beforeend','<div class="tb"><button class="btn s sm" data-d="jpg">⬇ JPG</button><button class="btn s sm" data-d="pdf">⬇ PDF</button></div><p class="note">AI-generated picture: check accuracy before sharing.</p>');
+h.querySelector('.tb').onclick=async e=>{const k=e.target.dataset.d;if(!k)return;try{const u=imgData(el,1600,.92),b=await(await fetch(u)).blob();if(k=='jpg')await dl.save({filename:'ai_picture.jpg',data:b});else{const d=new jspdf.jsPDF({unit:'pt',format:'a4'}),pw=d.internal.pageSize.getWidth(),w=pw-40,hh=w*el.naturalHeight/el.naturalWidth;d.addImage(u,'JPEG',20,20,w,hh);await dl.save({filename:'ai_picture.pdf',data:d.output('blob')})}}catch(x){toast('Download failed. Long-press the picture to save it.')}};
+try{addHist({type:'pic',k:'AI picture',t:'AI picture: '+String(t||'').slice(0,50),pic:imgData(el,640,.6)})}catch(e){}}
+function showPic(h,u,t){h.innerHTML='';const el=new Image();el.onload=()=>{h.appendChild(el);el.style.width='100%';el.style.borderRadius='10px';picActionsNoSave(h,el)};el.src=u}
+function picActionsNoSave(h,el){const keep=addHist;addHist=()=>{};try{picActions(h,el,'')}finally{addHist=keep}}
+/* Video download */
+function wrapT(x,txt,px,py,mw,lh,max){const ws=String(txt).split(' ');let l='',n=0;for(const w of ws){const tt=l?l+' '+w:w;if(x.measureText(tt).width>mw&&l){x.fillText(l,px,py+n*lh);n++;l=w;if(n>=max)return}else l=tt}if(l&&n<max)x.fillText(l,px,py+n*lh)}
+function drawFrame(x,img,s,W,H){x.fillStyle='#fff';x.fillRect(0,0,W,H);const ih=H-120,iw=ih*16/9;x.drawImage(img,(W-iw)/2,0,iw,ih);x.fillStyle='#0f4c5c';x.fillRect(0,ih,W,120);x.fillStyle='#fff';x.font='700 28px system-ui,"Noto Sans Devanagari",sans-serif';x.textBaseline='top';x.fillText(String(s.caption||'').slice(0,70),24,ih+12);x.font='21px system-ui,"Noto Sans Devanagari",sans-serif';wrapT(x,s.narration||'',24,ih+52,W-48,28,2)}
+async function recVideo(sc,onP){if(!window.MediaRecorder)throw new Error('Video download needs Chrome or Edge.');
+const mt=['video/webm;codecs=vp9','video/webm;codecs=vp8','video/webm'].find(m=>MediaRecorder.isTypeSupported(m));if(!mt)throw new Error('This browser cannot record video.');
+const W=1280,H=720,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d'),rec=new MediaRecorder(c.captureStream(15),{mimeType:mt,videoBitsPerSecond:2500000}),ch=[];rec.ondataavailable=e=>e.data.size&&ch.push(e.data);const done=new Promise(r=>rec.onstop=r);
+const imgs=[];for(const s of sc)imgs.push(await loadImg(svgUrl(sized(s.s))));rec.start();
+for(let i=0;i<sc.length;i++){onP&&onP(i+1,sc.length);const ms=Math.max(3500,String(sc[i].narration||'').split(' ').length*350),t0=performance.now();while(performance.now()-t0<ms){drawFrame(x,imgs[i],sc[i],W,H);await new Promise(r=>setTimeout(r,66))}}
+rec.stop();await done;return new Blob(ch,{type:'video/webm'})}
+async function storyPdf(sc,n){const d=new jspdf.jsPDF({unit:'pt',format:'a4',orientation:'l'}),pw=d.internal.pageSize.getWidth(),ph=d.internal.pageSize.getHeight(),W=1280,H=720;
+for(let i=0;i<sc.length;i++){const c=document.createElement('canvas');c.width=W;c.height=H;drawFrame(c.getContext('2d'),await loadImg(svgUrl(sized(sc[i].s))),sc[i],W,H);if(i)d.addPage();const k=Math.min(pw/W,ph/H);d.addImage(c.toDataURL('image/jpeg',.9),'JPEG',(pw-W*k)/2,(ph-H*k)/2,W*k,H*k)}
+await dl.save({filename:n+'.pdf',data:d.output('blob')})}
+function bindVid(h,title,sc){const nm=String(title||'explainer').toLowerCase().replace(/\W+/g,'_').slice(0,30)||'explainer';
+$('#vdl').onclick=async e=>{const b=e.target;if(b.disabled)return;b.disabled=true;const old=b.textContent;try{const bl=await recVideo(sc,(i,n)=>b.textContent='Recording '+i+'/'+n+'…');await dl.save({filename:nm+'.webm',data:bl})}catch(x){toast(x.message||'Could not create the video')}b.textContent=old;b.disabled=false};
+$('#vpdf').onclick=async()=>{try{await storyPdf(sc,nm+'_storyboard')}catch(x){toast('Could not create the PDF')}}}
+/* Check results */
+function saveCheck(d){try{const q=d.questions||[];addHist({type:'check',k:'Answer sheet check',t:'Marks: '+(d.student||$('#cName').value||'student'),c:'## Marks: '+(d.student||'student')+'\n\n| Q | Marks | Feedback |\n|---|---|---|\n'+q.map(x=>'| '+x.q+' | '+x.awarded+'/'+x.max+' | '+String(x.feedback||'').replace(/\|/g,'/')+(x.review?' (manual review)':'')+' |').join('\n')+'\n\n'+(d.overall||'')})}catch(e){}}
+document.addEventListener('click',e=>{if(e.target.id!='cpdf')return;const rows=[...document.querySelectorAll('#ct tr')].map((r,i)=>i?r.cells[0].textContent+'. '+r.querySelector('input').value+'/'+r.querySelector('.mx').textContent+' marks - '+r.cells[2].textContent:'').slice(1);pdfSave('Answer sheet marks\n'+$('#tot').textContent+'\n\n'+rows.join('\n'),'marks').catch(()=>{})});
+/* History */
+function histSave(a){a=a.slice(0,80);for(;;){try{localStorage.setItem('ata_lib',JSON.stringify(a));return true}catch(e){if(a.length<=1)return false;a.pop()}}}
+function addHist(it){try{const a=LIB();it.id=Date.now()+Math.random();it.d=new Date().toLocaleString();a.unshift(it);if(histSave(a))toast('Saved to History ✓')}catch(e){}}
+function lib(k,c){c=c||'';addHist({type:'doc',k:String(k).replace(/_/g,' '),t:(c.split('\n').find(l=>l.trim())||k).replace(/[#*`]/g,'').trim().slice(0,70),c})}
+Object.keys(HM).forEach(k=>{const c=document.createElement('span');c.className='chip'+(k==HF?' on':'');c.textContent=k;c.onclick=()=>{HF=k;renderLib()};$('#lf').appendChild(c)});
+function libRow(x,h,full){const d=document.createElement('div');d.className='tile';d.innerHTML='<b style="font-size:14px">'+(ICON[x.type]||'📄')+' '+esc(x.t||'Untitled')+'</b><span>'+esc(x.k||'')+' · '+esc(x.d||'')+'</span>'+(full?'<div class="tb"><button class="btn s sm" data-a="o">Open</button><button class="btn s sm" data-a="x">🗑 Delete</button></div>':'');
+d.onclick=e=>{if(e.target.dataset&&e.target.dataset.a=='x'){e.stopPropagation();delHist(x);return}openItem(x)};h.appendChild(d)}
+function renderLib(){const q=($('#lq').value||'').toLowerCase();let a=LIB();if(CH.length)a=[{id:'cur',type:'chat',k:'Current chat',t:'Current chat ('+CH.length+' messages)',d:'now',cur:1},...a];const f=HM[HF];
+a=a.filter(x=>(!f||f.includes(x.type||'doc'))&&((x.t||'')+(x.k||'')+(x.c||'')).toLowerCase().includes(q));
+$('#ll').innerHTML=a.length?'':'<p class="note">Nothing here yet. Everything you create is saved automatically.</p>';a.forEach(x=>libRow(x,$('#ll'),true));[...$('#lf').children].forEach(c=>c.classList.toggle('on',c.textContent==HF))}
+function delHist(x){if(!confirm('Delete this item?'))return;if(x.cur){CH=[];saveCH();hist=[];msgs.innerHTML='';bub('a',md('Chat cleared.'))}else histSave(LIB().filter(y=>y.id!=x.id));renderLib();home();toast('Deleted')}
+$('#lclr').onclick=()=>{if(!confirm('Delete ALL history, including the current chat? This cannot be undone.'))return;try{localStorage.removeItem('ata_lib')}catch(e){}CH=[];saveCH();hist=[];msgs.innerHTML='';bub('a',md('History cleared.'));renderLib();home();toast('History cleared')};
+function archiveChat(){if(!CH.length)return;try{const a=LIB();a.unshift({id:Date.now()+Math.random(),type:'chat',k:'Chat',t:String((CH.find(m=>m.u)||{u:'Chat'}).u).slice(0,60),d:new Date().toLocaleString(),msgs:CH.slice()});histSave(a)}catch(e){}}
+function renderChat(msg){msgs.innerHTML='';bub('a',md(msg));hist=[];CH.forEach(x=>{if(x.u)bub('u',esc(x.u).replace(/\n/g,'<br>'));const b=bub('a',md(x.a));addAct(b,x.a);hist.push({role:'user',content:x.u||'(file)'},{role:'assistant',content:x.a})});hist=hist.slice(-12);msgs.scrollTop=msgs.scrollHeight}
+function loadChat(x){if(x.cur){go('chat');return}archiveChat();CH=(x.msgs||[]).slice();saveCH();histSave(LIB().filter(y=>y.id!=x.id));renderChat('Chat loaded. Continue where you left off.');go('chat')}
+function openItem(x){const k=x.type||'doc';
+if(k=='chat')return loadChat(x);
+if(k=='quiz'&&x.q){QZ={q:x.q,i:0,s:0};go('learn');return qz()}
+if(k=='cards'&&x.cards){FC={c:x.cards,i:0};go('learn');return fc()}
+if(k=='visual'&&x.svg){go('studio');return showVisual($('#sOut'),x.svg,x.t,x.k,false)}
+if(k=='pic'&&x.pic){go('studio');return showPic($('#sOut'),x.pic,x.t)}
+if(k=='video'&&x.scenes){go('studio');return player($('#sOut'),x.t,x.scenes)}
+openLib(x)}
+</script>
+<script>
+/* ===== v6: splash, human voice, auto-language mic, RAG sources, validation, media in chat ===== */
+setTimeout(()=>{const s=$('#splash');s&&s.classList.add('out')},2900);setTimeout(()=>{const s=$('#splash');s&&s.remove()},3500);
+/* --- human-like voice --- */
+let curAudio=null,spkTok=0,talk=false,voiceTurn=false;
+function stopAudio(){spkTok++;if(curAudio){try{curAudio.pause()}catch(e){}curAudio=null}}
+const _sc=speechSynthesis.cancel.bind(speechSynthesis);speechSynthesis.cancel=()=>{_sc();stopAudio()};
+const cleanSpeech=t=>t.replace(/\*\*Sources\*\*[\s\S]*$/,'').replace(/https?:\/\/\S+/g,'').replace(/\[\d+\]/g,'').replace(/[*#`|_>~]+/g,' ').replace(/\s+/g,' ').trim();
+function chunks(t){const o=[];let c='';for(const s of t.split(/(?<=[.!?।])\s+/)){if((c+' '+s).length>420&&c){o.push(c);c=s}else c=c?c+' '+s:s}if(c)o.push(c);return o}
+function bestVoice(hi){const v=speechSynthesis.getVoices(),c=v.filter(x=>x.lang.toLowerCase().startsWith(hi?'hi':'en'));return c.find(x=>/natural|neural|online/i.test(x.name)&&(hi||/IN/i.test(x.lang)))||c.find(x=>/google/i.test(x.name)&&(hi||/IN/i.test(x.lang)))||c.find(x=>/google|natural|neural/i.test(x.name))||c.find(x=>/IN/i.test(x.lang))||c[0]}
+function browserSpeak(parts,hi,my,done){let i=0;const nx=()=>{if(my!=spkTok||i>=parts.length)return done&&done();const u=new SpeechSynthesisUtterance(parts[i++]),v=bestVoice(hi);if(v)u.voice=v;u.lang=hi?'hi-IN':(v&&v.lang)||'en-IN';u.rate=.95;u.onend=nx;u.onerror=nx;_sc();speechSynthesis.speak(u)};nx()}
+async function speakText(raw,onEnd){stopAudio();_sc();const my=spkTok,t=cleanSpeech(String(raw)).slice(0,3000);if(!t){onEnd&&onEnd();return}
+const hi=/[\u0900-\u097F]/.test(t),parts=chunks(t);
+if(window.puter&&puter.ai&&puter.ai.txt2speech){try{
+const get=c=>puter.ai.txt2speech(c,{provider:'openai',model:'gpt-4o-mini-tts',voice:hi?'shimmer':'nova',instructions:'Speak like a warm, friendly human teacher: natural pace, gentle expression, clear pronunciation.'});
+let nx=get(parts[0]);for(let i=0;i<parts.length;i++){const au=await nx;if(my!=spkTok)return;nx=i+1<parts.length?get(parts[i+1]):null;nx&&nx.catch(()=>{});
+await new Promise(r=>{curAudio=au;au.onended=r;au.onerror=r;au.play().catch(r)})}
+if(my==spkTok)onEnd&&onEnd();return}catch(e){if(my!=spkTok)return}}
+browserSpeak(parts,hi,my,()=>my==spkTok&&onEnd&&onEnd())}
+function speak(t){if(curAudio||speechSynthesis.speaking){speechSynthesis.cancel();return}speakText(t)}
+/* --- mic: auto Hindi/English (Whisper via Puter, with browser fallback) --- */
+let micOn=false,mrec=null,mst=null,mch=[],mac=null,srr=null;const micB=$('#mic');
+$('#micL')&&$('#micL').remove();micB.title='Speak in Hindi or English: language is detected automatically';
+function micState(on,busyT){micOn=on;micB.textContent=busyT?'⏳':on?'⏹':'🎤';micB.style.background=on?'#fee2e2':'';if(!on)micB.style.boxShadow=''}
+function stopRec(){if(srr){try{srr.stop()}catch(e){}return}if(mrec&&mrec.state!='inactive')mrec.stop();micState(false)}
+async function transcribe(bl){const f=new File([bl],'speech.'+(/mp4/.test(bl.type)?'m4a':'webm'),{type:bl.type});const r=await puter.ai.speech2txt(f);return String(typeof r=='string'?r:(r&&r.text)||'').trim()}
+function srFallback(){const SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast('Voice needs Chrome or a Puter sign-in.');return}
+const r=new SR();r.lang='hi-IN';r.interimResults=true;srr=r;micState(true);let fin=false;
+r.onresult=e=>{let s='';for(const x of e.results)s+=x[0].transcript;$('#inp').value=s;$('#inp').dispatchEvent(new Event('input'));if(e.results[e.results.length-1].isFinal){fin=true;voiceTurn=true;send()}};
+r.onerror=e=>{if(e.error=='not-allowed')toast('Allow microphone permission for this site.')};r.onend=()=>{srr=null;micState(false)};r.start()}
+async function micToggle(){if(micOn){stopRec();return}stopAudio();_sc();
+if(!(window.puter&&puter.ai&&puter.ai.speech2txt&&window.MediaRecorder&&navigator.mediaDevices))return srFallback();
+try{mst=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast('Allow microphone permission for this site.');return}
+const mt=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(m=>MediaRecorder.isTypeSupported(m))||'';mrec=new MediaRecorder(mst,mt?{mimeType:mt}:{});mch=[];
+mrec.ondataavailable=e=>e.data.size&&mch.push(e.data);
+mrec.onstop=async()=>{mst.getTracks().forEach(t=>t.stop());try{mac&&mac.close()}catch(e){}const bl=new Blob(mch,{type:mrec.mimeType||'audio/webm'});if(bl.size<2500){micState(false);toast('I did not hear anything. Tap the mic and try again.');return}
+micState(true,true);micB.disabled=true;try{const tx=await transcribe(bl);if(!tx)throw 0;$('#inp').value=tx;$('#inp').dispatchEvent(new Event('input'));voiceTurn=true;send()}catch(e){toast('Could not understand the audio. Check your internet or Puter sign-in.')}micB.disabled=false;micState(false)};
+mrec.start();micState(true);toast('Listening… speak in Hindi or English');
+try{mac=new(window.AudioContext||window.webkitAudioContext)();const an=mac.createAnalyser();an.fftSize=512;mac.createMediaStreamSource(mst).connect(an);const buf=new Uint8Array(512);let heard=false,q=0;const t0=Date.now();
+const tick=()=>{if(!micOn||!mrec||mrec.state=='inactive')return;an.getByteTimeDomainData(buf);let m=0;for(const v of buf)m=Math.max(m,Math.abs(v-128));const l=m/128;micB.style.boxShadow='0 0 0 '+Math.round(l*20)+'px #ef444444';
+if(l>.06){heard=true;q=0}else if(heard)q++;if((heard&&q>70)||Date.now()-t0>60000||(!heard&&Date.now()-t0>9000)){stopRec();return}requestAnimationFrame(tick)};tick()}catch(e){}}
+micB.onclick=micToggle;
+const listenSoon=()=>setTimeout(()=>{if(talk&&!micOn&&!busy)micToggle()},400);
+/* --- RAG: retrieve sources --- */
+const STOPW=new Set('what is are the a an of in on for to how why who when where which explain tell me about give define describe please can you do does did and or with by from as at make write'.split(' '));
+const kw=q=>{const w=q.toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(x=>x&&!STOPW.has(x));return w.slice(0,8).join(' ')||q};
+async function fT(u,ms=5500){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{return await fetch(u,{signal:c.signal})}finally{clearTimeout(t)}}
+async function wiki(q,lg){const j=await(await fT('https://'+lg+'.wikipedia.org/w/api.php?action=query&generator=search&gsrsearch='+encodeURIComponent(q)+'&gsrlimit=3&prop=extracts|info&exintro=1&explaintext=1&exchars=900&inprop=url&format=json&origin=*')).json();
+return Object.values((j.query||{}).pages||{}).sort((a,b)=>a.index-b.index).map(x=>({title:x.title,url:x.fullurl,site:lg=='hi'?'Wikipedia (हिन्दी)':'Wikipedia',text:(x.extract||'').trim()})).filter(x=>x.text)}
+async function oalex(q){const j=await(await fT('https://api.openalex.org/works?search='+encodeURIComponent(q)+'&per-page=3&select=title,doi,id,abstract_inverted_index')).json();
+return(j.results||[]).map(w=>{const ps=[];for(const[k,v]of Object.entries(w.abstract_inverted_index||{}))v.forEach(i=>ps[i]=k);return{title:w.title,url:w.doi||w.id,site:'OpenAlex (research)',text:ps.join(' ').slice(0,700)}}).filter(x=>x.text&&x.title)}
+async function getSources(t){if(/^(hi|hello|hey|thanks?|thank you|ok|okay|namaste|नमस्ते|धन्यवाद)\b/i.test(t)||t.length<9)return[];
+const hi=/[\u0900-\u097F]/.test(t),q=hi?t:kw(t),jobs=[wiki(q,hi?'hi':'en')];if(!hi&&S.typ!='School')jobs.push(oalex(q));
+const rs=await Promise.allSettled(jobs),out=[];rs.forEach(r=>r.status=='fulfilled'&&out.push(...r.value));
+return out.slice(0,5).map((s,i)=>({...s,n:i+1}))}
+/* --- AI validation --- */
+async function validate(q,r,src,box){box.className='vb';box.textContent='🔍 AI is fact-checking this answer…';
+try{const sc=src.length?src.map(s=>'['+s.n+'] '+s.title+': '+s.text.slice(0,500)).join('\n'):'(no web sources: judge by well-established knowledge)';
+const d=pj(await ask('You are a strict fact-checker for a teaching assistant. Question: '+q+'\n\nAnswer to check:\n'+r.slice(0,3500)+'\n\nSources:\n'+sc+'\n\nCheck whether the answer is factually correct and supported by the sources or by well-established knowledge. Reply with ONLY JSON: {"score":0-100,"verdict":"Verified|Mostly supported|Needs checking","summary":"one short sentence","issues":["short issue"]}'));
+const s=Math.max(0,Math.min(100,+d.score||0)),ok=s>=75;box.className='vb '+(ok?'ok':'wr');
+box.innerHTML='<details><summary>'+(ok?'✅':'⚠️')+' '+esc(d.verdict||'Checked')+' · '+s+'%'+(src.length?' · '+src.length+' source'+(src.length>1?'s':''):' · general knowledge')+'</summary><p>'+esc(d.summary||'')+'</p>'+((d.issues||[]).length?'<ul>'+d.issues.slice(0,4).map(x=>'<li>'+esc(String(x))+'</li>').join('')+'</ul>':'')+'<p class="note">AI check. The teacher decides.</p></details>'}catch(e){box.remove()}}
+/* --- image / infographic / video from chat --- */
+function mediaIntent(t){const s=t.toLowerCase();if(!/make|create|generate|draw|show|give|bana|बना|तैयार|दिखा|चाहिए/.test(s))return null;
+if(/infograph|इन्फोग्राफ/.test(s))return'Infographic';if(/video|वीडियो/.test(s))return'Animated explainer video';if(/diagram|flowchart|chart|डायग्राम|चार्ट/.test(s))return'Image';
+if(/image|picture|photo|illustration|poster|drawing|तस्वीर|इमेज|फोटो|फ़ोटो|चित्र/.test(s))return'AI picture';return null}
+async function chatMedia(k,t,a){const h=document.createElement('div');h.className='vis';a.innerHTML='<i>Creating your '+(k=='AI picture'?'picture':k.toLowerCase())+'… this can take a minute.</i>';
+const ctx='Level: '+(S.cls||'general')+'. Subject: '+(S.sub||'general')+'. Request: '+t+'. Use clear labels, large readable text, accurate facts, no external images or fonts.';
+if(k=='AI picture'){try{await aiPic(h,t);a.innerHTML='Here is your picture:';a.appendChild(h);return}catch(e){k='Image'}}
+if(k=='Animated explainer video'){const d=pj(await ask(ctx+'\nCreate an animated explainer video of 4-6 scenes. Reply with ONLY JSON: {"title":"","scenes":[{"caption":"short heading","narration":"1-2 simple sentences","svg":"self-contained SVG viewBox 0 0 800 450 with SMIL animation, no scripts"}]}',{tier:'complex'})),sc=(d.scenes||[]).map(x=>({...x,s:getSvg(x.svg||'')})).filter(x=>x.s);if(!sc.length)throw new Error('Could not create the video. Please try again.');
+a.innerHTML='Here is your video (with a human-like voice-over):';a.appendChild(h);$$('#msgs [id]').forEach(e=>{if(!h.contains(e))e.removeAttribute('id')});player(h,d.title,sc);addHist({type:'video',k:'Animated video',t:'Video: '+(d.title||t).slice(0,50),scenes:sc.map(x=>({caption:x.caption,narration:x.narration,s:x.s}))});return}
+const s=getSvg(await ask(ctx+'\nCreate a '+k.toLowerCase()+' as ONE self-contained SVG ('+(k=='Infographic'?'viewBox="0 0 800 1100"':'viewBox="0 0 800 600"')+'), no scripts. Reply with only the SVG code.',{tier:'complex'}));if(!s)throw new Error('Could not create the graphic. Please try again.');
+showVisual(h,s,t,k,true);a.innerHTML='Here is your '+k.toLowerCase()+':';a.appendChild(h)}
+$('#sGo').addEventListener('click',()=>$$('#msgs [id]').forEach(e=>e.removeAttribute('id')),true);
+/* --- new chat flow: sources + validation + voice --- */
+send=async function(){const t=$('#inp').value.trim();if(!t&&!att.length||busy)return;busy=true;$('#send').textContent='Stop';const vt=voiceTurn;voiceTurn=false;stopAudio();
+const files=att;att=[];$('#att').textContent='';$('#fl').value='';$('#inp').value='';$('#inp').style.height='auto';
+bub('u',esc(t).replace(/\n/g,'<br>')+(files.length?'<div style="font-size:12px;opacity:.8">📎 '+esc(names(files))+'</div>':''));
+const a=bub('a',dots);ctl=new AbortController();
+try{const mk=!files.length&&mediaIntent(t);
+if(mk){await chatMedia(mk,t,a);if(vt)speakText('Here you go. I have created it for you.',()=>talk&&listenSoon())}
+else{let im=[],src=[];if(files.length){a.innerHTML='<i>Reading files…</i>';im=await toImgs(files)}else{a.innerHTML='<i>🔎 Searching trusted sources…</i>';try{src=await getSources(t)}catch(e){}}
+const q=(files.length?'[Teacher attached '+im.length+' image(s)/page(s)/video frame(s) from: '+names(files)+'. Analyse them to answer.]\n':'')+(t||'Analyse the attached material and summarise it for teaching.');
+const q2=q+'\n\n[Reply in the same language the teacher wrote in (Hindi in Devanagari if asked in Hindi).]'+(src.length?'\n[WEB SOURCES retrieved for this question. Cite them as [1], [2] after the sentences they support. Use a source only if it is relevant; if they do not cover the question, answer from general knowledge and say so. Never invent sources.]\n'+src.map(s=>'['+s.n+'] '+s.title+' ('+s.site+'): '+s.text).join('\n'):'');
+a.innerHTML=dots;const r=await ask([{role:'user',content:SYS()+'\n\nConversation follows.'},{role:'assistant',content:'Understood.'},...hist,{role:'user',content:q2}],{el:a,images:im,signal:ctl.signal});
+hist.push({role:'user',content:q},{role:'assistant',content:r});hist=hist.slice(-12);
+a.innerHTML=md(r).replace(/\[(\d{1,2})\]/g,(m,n)=>{const s=src[n-1];return s?'<a class="cit" href="'+s.url+'" target="_blank" rel="noopener" title="'+esc(s.title).replace(/"/g,'&quot;')+'">'+n+'</a>':m});
+const used=[...new Set([...r.matchAll(/\[(\d{1,2})\]/g)].map(m=>+m[1]))].filter(n=>src[n-1]).map(n=>src[n-1]);
+const pb=document.createElement('button');pb.className='btn s sm';pb.textContent='Save PDF';pb.onclick=()=>pdfSave(a.innerText,'chat_answer').catch(()=>{});a.appendChild(pb);addAct(a,r);
+if(used.length){const d=document.createElement('div');d.className='src';d.innerHTML='<b>Sources</b>'+used.map(s=>'<a href="'+s.url+'" target="_blank" rel="noopener"><i>'+s.n+'</i><span>'+esc(s.title)+'<small>'+esc(s.site)+' ↗</small></span></a>').join('');a.appendChild(d)}
+const vb=document.createElement('div');a.appendChild(vb);
+CH.push({u:t,a:r+(used.length?'\n\n**Sources**\n'+used.map(s=>'['+s.n+'] '+s.title+' - '+s.url).join('\n'):'')});saveCH();
+if(vt)speakText(r,()=>talk&&listenSoon());
+if(!files.length&&t.length>8)validate(t,r,used.length?used:src,vb);else vb.remove()}}
+catch(e){if(ctl.signal.aborted)a.innerHTML+='<p class="note">Stopped.</p>';else a.innerHTML='<p class="err">'+esc(e.message||'Something went wrong.')+'</p>'}
+busy=false;$('#send').textContent='Send';msgs.scrollTop=msgs.scrollHeight};
+/* --- chips --- */
+(function(){const qc=$('#qc'),c=document.createElement('span');c.className='chip';c.textContent='🗣 Voice chat: off';c.onclick=()=>{talk=!talk;c.textContent='🗣 Voice chat: '+(talk?'on':'off');c.classList.toggle('on',talk);if(talk){toast('Voice chat on: I will listen again after I answer.');if(!busy&&!micOn)micToggle()}else stopAudio()};qc.prepend(c);
+['Generate an image of the water cycle','Make an infographic on photosynthesis','Create a video on how vaccines work','मुझे फोटोसिंथेसिस समझाइए'].forEach(t=>{const x=document.createElement('span');x.className='chip';x.textContent=t;x.onclick=()=>{$('#inp').value=t;$('#inp').focus()};qc.appendChild(x)})})();
+</script>
+
+<script>
+/* ===== v7: full-prompt chat box, safer startup ===== */
+(function(){const i=$('#inp');i.rows=1;const fit=()=>{i.style.height='auto';i.style.height=Math.min(Math.round(innerHeight*(i.classList.contains('tall')?.72:.45)),i.scrollHeight+2)+'px'};
+i.oninput=fit;const x=document.createElement('button');x.type='button';x.className='ib xp';x.id='xp';x.textContent='⤢';x.title='Expand or shrink the message box';
+x.onclick=()=>{const t=i.classList.toggle('tall');x.textContent=t?'⤡':'⤢';fit();i.focus()};i.after(x);
+new MutationObserver(fit).observe(i,{attributes:true,attributeFilter:['value']});
+const d=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value');Object.defineProperty(i,'value',{get(){return d.get.call(i)},set(v){d.set.call(i,v);fit()}});})();
+</script>
+<style id="v8">
+:root{--r:18px;--sh:0 6px 24px -10px rgba(15,40,60,.35)}
+body{background:radial-gradient(900px 420px at 95% -5%,color-mix(in srgb,var(--pr) 16%,transparent),transparent),var(--bg)}
+header{background:linear-gradient(120deg,var(--pr),color-mix(in srgb,var(--pr) 55%,#000));border:0;box-shadow:var(--sh);padding:12px 14px;z-index:5}
+header h1{color:var(--pt);font-size:18px}header .btn.s{background:#ffffff26;color:var(--pt);border:0}
+.card{border-radius:var(--r);box-shadow:var(--sh)}.tile{border-radius:var(--r);box-shadow:var(--sh)}
+.tg .tile b{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;background:color-mix(in srgb,var(--pr) 14%,var(--sf));margin-bottom:6px}
+.hero{background:linear-gradient(135deg,var(--pr),color-mix(in srgb,var(--ac) 60%,var(--pr)));border-radius:22px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;right:-30px;top:-40px;width:150px;height:150px;border-radius:50%;background:#ffffff26}
+.stats{display:flex;gap:8px;margin-top:12px;position:relative;z-index:1}.stats div{flex:1;background:#ffffff26;border-radius:12px;padding:6px 8px;font-size:11px}.stats b{display:block;font-size:19px}
+.tip{background:color-mix(in srgb,var(--ac) 16%,var(--sf));border:1px dashed var(--ac);border-radius:14px;padding:10px 12px;font-size:13px;margin-bottom:12px}
+.m{border-radius:18px;box-shadow:0 2px 8px -4px #0005}.m.u{background:linear-gradient(135deg,var(--ub),color-mix(in srgb,var(--ub) 65%,#000));border-bottom-right-radius:5px}.m:not(.u){border-bottom-left-radius:5px}
+.bar{border-radius:22px 22px 0 0;box-shadow:0 -8px 22px -14px #000a}.row textarea{border-radius:20px}.ib{box-shadow:var(--sh)}
+.ib.rec{background:#fee2e2;border-color:#ef4444;animation:pl 1s infinite}@keyframes pl{to{box-shadow:0 0 0 14px #ef444400}}
+nav{box-shadow:0 -8px 22px -16px #000a}nav button{position:relative;transition:.2s}nav button.on b{transform:translateY(-2px) scale(1.15)}nav button.on:before{content:"";position:absolute;top:0;left:30%;right:30%;height:3px;border-radius:0 0 4px 4px;background:var(--pr)}
+.btn{border-radius:12px}.vis img{box-shadow:var(--sh)}.vcv{width:100%;border-radius:14px;background:#0b1020;display:block;box-shadow:var(--sh);margin:6px 0}
+#cf{max-width:340px}#cf::backdrop,dialog::backdrop{background:#0008;backdrop-filter:blur(3px)}
+</style>
+<script>
+(function(){
+/* ===== v8: working delete, real mic, human voice, AI images and narrated video, nicer UI ===== */
+const AC=window.AudioContext||window.webkitAudioContext,SRc=window.SpeechRecognition||window.webkitSpeechRecognition,HI=t=>/[\u0900-\u097F]/.test(t||'');
+const signed=()=>{try{return !!(window.puter&&puter.auth&&puter.auth.isSignedIn&&puter.auth.isSignedIn())}catch(e){return false}};
+const LS=(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return d}};
+/* ---- delete fix: confirm() is blocked in many browsers/webviews, so use our own dialog ---- */
+function cfm(msg,ok){return new Promise(res=>{let d=$('#cf');if(!d){d=document.createElement('dialog');d.id='cf';document.body.appendChild(d)}
+d.innerHTML='<p style="margin:0 0 12px;font-weight:600">'+esc(msg)+'</p><div class="tb" style="justify-content:flex-end"><button class="btn s sm" data-v="0">Cancel</button><button class="btn sm" style="background:#dc2626;color:#fff" data-v="1">'+(ok||'Delete')+'</button></div>';
+d.onclick=e=>{const v=e.target.dataset&&e.target.dataset.v;if(v!=null){d.close();res(v=='1')}};d.oncancel=()=>res(false);d.showModal()})}
+delHist=async function(x){if(!await cfm('Delete this item permanently?'))return;if(x.cur){CH=[];saveCH();hist=[];msgs.innerHTML='';bub('a',md('Chat cleared.'))}else histSave(LIB().filter(y=>y.id!=x.id));renderLib();home();toast('Deleted 🗑')};
+$('#lclr').onclick=async()=>{if(!await cfm('Delete ALL history, including the current chat?','Delete all'))return;try{localStorage.removeItem('ata_lib')}catch(e){}CH=[];saveCH();hist=[];msgs.innerHTML='';bub('a',md('History cleared.'));renderLib();home();toast('History cleared')};
+/* ---- human-like voice: Puter/OpenAI voice or free Pollinations voice, browser voice only as last resort ---- */
+const VOICES={nova:'♀ Nova · warm female',shimmer:'♀ Shimmer · soft female',coral:'♀ Coral · friendly female',sage:'♀ Sage · calm mature female',alloy:'⚪ Alloy · neutral',onyx:'♂ Onyx · deep male',echo:'♂ Echo · calm male',fable:'♂ Fable · storyteller male',ash:'♂ Ash · casual young male',ballad:'♂ Ballad · gentle male',verse:'♂ Verse · expressive male'};
+const TONES={friendly:{n:'😊 Friendly teacher',i:'Speak like a warm, friendly teacher: natural pace, gentle expression.',r:1,p:1},calm:{n:'🧘 Calm & soothing',i:'Speak very calmly and softly, slowly, with long gentle pauses, like a meditation guide.',r:.88,p:.95},energetic:{n:'⚡ Energetic & excited',i:'Speak with high energy and excitement: upbeat, fast, big enthusiasm and strong emphasis on key words.',r:1.12,p:1.08},story:{n:'📖 Storyteller',i:'Speak like a dramatic storyteller: very expressive, varied intonation, theatrical pauses.',r:.95,p:1.02},serious:{n:'🎓 Serious & formal',i:'Speak in a serious, formal, authoritative lecture tone: crisp, measured, no playfulness.',r:.97,p:.92},kid:{n:'🧒 Playful (young kids)',i:'Speak in a playful, cheerful, sing-song voice for young children, very expressive.',r:1.02,p:1.15}};
+const VS={v:LS('ata_voice','nova'),s:+LS('ata_vsp',1)||1,t:LS('ata_tone','friendly')};
+if(!VOICES[VS.v])VS.v='nova';if(!TONES[VS.t])VS.t='friendly';
+const gv=()=>VS.v,gs=()=>VS.s,gt=()=>TONES[VS.t]||TONES.friendly;
+const VM={nova:{g:'f',p:1.15,a:1.03,k:0},shimmer:{g:'f',p:1.45,a:1.07,k:1},coral:{g:'f',p:1.05,a:1,k:2},sage:{g:'f',p:.9,a:.97,k:3},alloy:{g:'n',p:1,a:1,k:0},onyx:{g:'m',p:.5,a:.9,k:0},echo:{g:'m',p:.75,a:.95,k:1},fable:{g:'m',p:1,a:1,k:2},ash:{g:'m',p:.85,a:.97,k:3},ballad:{g:'m',p:.65,a:.93,k:4},verse:{g:'m',p:.95,a:1.02,k:5}};
+const PM={coral:'shimmer',sage:'nova',ash:'onyx',ballad:'echo',verse:'fable'};
+async function ttsBlob(t,hi){const how={
+f:async()=>{for(const v of [...new Set([gv(),PM[gv()]||gv()])]){try{const r=await fT('https://text.pollinations.ai/'+encodeURIComponent(t)+'?model=openai-audio&voice='+v,20000),b=await r.blob();if(r.ok&&/audio/.test(b.type)&&b.size>=800)return b}catch(e){}}throw 0},
+p:async()=>{if(!(window.puter&&puter.ai&&puter.ai.txt2speech))throw 0;const g=(VM[gv()]||{}).g,au=await puter.ai.txt2speech(t,{provider:'openai',model:'gpt-4o-mini-tts',voice:gv(),instructions:'You are '+(g=='m'?'a male':g=='f'?'a female':'a')+' teacher. '+gt().i});return await(await fetch(au.src)).blob()}};
+for(const k of signed()?['p','f']:['f','p']){try{return await how[k]()}catch(e){}}return null}
+const chunks2=(t,m)=>{const o=[];let c='';for(const s of t.split(/(?<=[.!?।])\s+/).flatMap(s=>s.length>m?s.match(new RegExp('.{1,'+m+'}(\\s|$)','g')):[s])){if((c+' '+s).length>m&&c){o.push(c);c=s}else c=c?c+' '+s:s}if(c)o.push(c);return o};
+function pickBV(hi){const m=VM[gv()]||{g:'n',k:0},all=speechSynthesis.getVoices().filter(x=>x.lang.toLowerCase().startsWith(hi?'hi':'en')),isF=x=>/female|zira|heera|swara|neerja|samantha|susan|veena|priya|aditi|kalpana/i.test(x.name),isM=x=>/(^|[^a-z])male|david|mark|ravi|hemant|prabhat|madhur|guy|rishi|daniel/i.test(x.name);let pool=all.filter(m.g=='f'?isF:m.g=='m'?isM:()=>true);if(!pool.length)pool=all;const nat=pool.filter(x=>/natural|neural|online/i.test(x.name)),P=nat.length?nat:pool;return P[(m.k||0)%(P.length||1)]||bestVoice(hi)}
+browserSpeak=function(parts,hi,my,done){let i=0;const nx=()=>{if(my!=spkTok||i>=parts.length)return done&&done();const u=new SpeechSynthesisUtterance(parts[i++]),v=pickBV(hi),m=VM[gv()]||{p:1},T=gt();if(v)u.voice=v;u.lang=hi?'hi-IN':(v&&v.lang)||'en-IN';u.rate=Math.min(2,Math.max(.5,.92*gs()*T.r));u.pitch=Math.min(2,Math.max(.3,m.p*T.p));u.onend=nx;u.onerror=nx;_sc();speechSynthesis.speak(u)};nx()};
+speakText=async function(raw,onEnd){stopAudio();_sc();const my=spkTok,t=cleanSpeech(String(raw)).slice(0,3000);if(!t){onEnd&&onEnd();return}
+const hi=HI(t),parts=chunks2(t,hi?150:300);let nx=ttsBlob(parts[0],hi);
+for(let i=0;i<parts.length;i++){const b=await nx;if(my!=spkTok)return;if(!b){toast('⚠ AI voice server not reachable: using phone voice');return browserSpeak(parts.slice(i),hi,my,()=>my==spkTok&&onEnd&&onEnd())}
+nx=i+1<parts.length?ttsBlob(parts[i+1],hi):null;
+await new Promise(r=>{const au=new Audio(URL.createObjectURL(b));{const T=gt(),m=VM[gv()]||{a:1};au.preservesPitch=false;au.mozPreservesPitch=false;au.webkitPreservesPitch=false;au.playbackRate=Math.min(2,Math.max(.5,gs()*T.r*m.a*T.p))}curAudio=au;au.onended=r;au.onerror=r;au.play().catch(r)})}
+if(my==spkTok)onEnd&&onEnd()};
+speak=function(t){if(curAudio||speechSynthesis.speaking){speechSynthesis.cancel();return}toast('🔊 Preparing voice…');speakText(t)};
+(function(){const d=$('#thm'),w=document.createElement('div');w.innerHTML='<label>AI voice</label><select id="vcS">'+Object.entries(VOICES).map(([k,v])=>'<option value="'+k+'">'+v+'</option>').join('')+'</select><label>Tone / style</label><select id="tnS">'+Object.entries(TONES).map(([k,v])=>'<option value="'+k+'">'+v.n+'</option>').join('')+'</select><label>Speaking speed</label><select id="vsS"><option value=".75">Very slow</option><option value=".9">Slow</option><option value="1">Normal</option><option value="1.15">Fast</option><option value="1.3">Very fast</option></select><div class="tb"><button class="btn s sm" id="vcT">▶ Test voice</button></div>';d.insertBefore(w,d.lastElementChild);
+$('#vcS').value=gv();$('#tnS').value=VS.t;$('#vsS').value=String(gs());
+const sv=(k,v)=>{try{localStorage.setItem(k,String(v))}catch(x){}};
+$('#vcS').onchange=e=>{VS.v=e.target.value;sv('ata_voice',VS.v);toast('Voice: '+VOICES[VS.v]);$('#vcT').click()};
+$('#tnS').onchange=e=>{VS.t=e.target.value;sv('ata_tone',VS.t);toast('Tone: '+gt().n);$('#vcT').click()};
+$('#vsS').onchange=e=>{VS.s=+e.target.value||1;sv('ata_vsp',VS.s);$('#vcT').click()};
+$('#vcT').onclick=()=>speakText('Hello! I am your teaching assistant. नमस्ते, आज हम कुछ नया सीखेंगे।')})();
+/* ---- microphone: live dictation (Chrome) with recording + Whisper fallback ---- */
+const mic=$('#mic');let mLang=LS('ata_mic','en-IN'),mrc=null,mSR=null,mStr=null,mTm=null,mT0=0,mBase='',mFin='',mLast=0,mWant=false;
+const mL=document.createElement('button');mL.type='button';mL.className='ib';mL.style.fontSize='12px';mic.after(mL);
+const mLab=()=>{mL.textContent=mLang=='hi-IN'?'हिं':'EN';mL.title='Dictation language: tap to switch English / Hindi'};mLab();
+mL.onclick=()=>{mLang=mLang=='hi-IN'?'en-IN':'hi-IN';try{localStorage.setItem('ata_mic',mLang)}catch(e){}mLab();toast('Dictation: '+(mLang=='hi-IN'?'Hindi':'English')+(micOn?' (from next time)':''))};
+micState=function(on,w){micOn=on;mic.textContent=w?'⏳':on?'⏹':'🎤';mic.classList.toggle('rec',!!on&&!w);if(!on){clearInterval(mTm);mic.style.boxShadow='';$('#inp').placeholder='Ask anything: type, or tap 🎤 and speak Hindi or English'}};
+const mShow=it=>{const i=$('#inp');i.value=[mBase,mFin,it].filter(Boolean).join(' ').replace(/\s+/g,' ');i.dispatchEvent(new Event('input'))};
+function mDone(txt){micState(false);const i=$('#inp');if(txt){i.value=[mBase,txt].filter(Boolean).join(' ');i.dispatchEvent(new Event('input'))}
+if(!i.value.trim()){toast('I did not hear anything. Check your mic and try again.');return}
+if(talk){voiceTurn=true;send()}else{i.focus();toast('✓ Heard you. Edit if needed, then tap Send.')}}
+function startSR(){const r=new SRc();mSR=r;r.lang=mLang;r.interimResults=true;r.continuous=true;
+r.onresult=e=>{let it='';for(let i=e.resultIndex;i<e.results.length;i++){const s=e.results[i][0].transcript;if(e.results[i].isFinal)mFin+=(mFin?' ':'')+s.trim();else it+=s}mLast=Date.now();mShow(it)};
+r.onerror=e=>{if(e.error=='no-speech'||e.error=='aborted')return;mWant=false;mSR=null;if(['audio-capture','network','service-not-allowed'].includes(e.error)&&window.MediaRecorder&&navigator.mediaDevices){toast('Switching to recording mode…');recStart()}else{micState(false);toast(e.error=='not-allowed'?'Allow microphone permission for this site (needs https or localhost).':'Voice error: '+e.error)}};
+r.onend=()=>{if(mWant&&mSR===r){try{startSR()}catch(e){mWant=false;mSR=null;mDone()}}else if(mSR===r){mSR=null;mDone()}};r.start()}
+const toWav=async bl=>{const ac=new AC({sampleRate:16000}),b=await ac.decodeAudioData(await bl.arrayBuffer());ac.close();const d=b.getChannelData(0),v=new DataView(new ArrayBuffer(44+d.length*2)),w=(o,s)=>[...s].forEach((c,i)=>v.setUint8(o+i,c.charCodeAt(0)));
+w(0,'RIFF');v.setUint32(4,36+d.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);v.setUint32(24,16000,true);v.setUint32(28,32000,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,d.length*2,true);d.forEach((x,i)=>v.setInt16(44+i*2,Math.max(-1,Math.min(1,x))*32767,true));return new Blob([v],{type:'audio/wav'})};
+async function transcribe2(bl){const P=async()=>{if(!(window.puter&&puter.ai&&puter.ai.speech2txt))throw 0;const r=await puter.ai.speech2txt(new File([bl],'speech.'+(/mp4/.test(bl.type)?'m4a':'webm'),{type:bl.type}));return String(typeof r=='string'?r:(r&&r.text)||'').trim()};
+const F=async()=>{const w=await toWav(bl),r=await fetch('https://text.pollinations.ai/openai',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({model:'openai-audio',messages:[{role:'user',content:[{type:'text',text:'Transcribe this audio exactly in its original language (Hindi in Devanagari, English in Latin). Output only the transcript.'},{type:'input_audio',input_audio:{data:await b64(w),format:'wav'}}]}]})}),j=await r.json();return(j.choices?.[0]?.message?.content||'').trim()};
+for(const f of signed()?[P,F]:[F,P]){try{const t=await f();if(t)return t}catch(e){}}throw 0}
+async function recStart(){try{mStr=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true}})}catch(e){micState(false);toast(e&&e.name=='NotFoundError'?'No microphone found.':'Allow microphone permission (lock icon in the address bar; needs https or localhost).');return}
+const mt=['audio/webm;codecs=opus','audio/webm','audio/mp4'].find(m=>MediaRecorder.isTypeSupported(m))||'',ch=[];mrc=new MediaRecorder(mStr,mt?{mimeType:mt}:{});mrc.ondataavailable=e=>e.data.size&&ch.push(e.data);
+mrc.onstop=async()=>{mStr.getTracks().forEach(t=>t.stop());mStr=null;try{mac&&mac.close()}catch(e){}const bl=new Blob(ch,{type:mrc.mimeType||'audio/webm'});if(bl.size<2000)return mDone();micState(true,true);toast('Transcribing…');try{mDone(await transcribe2(bl))}catch(e){micState(false);toast('Could not transcribe. Check your internet or use Chrome.')}};
+mrc.start();micState(true);
+try{mac=new AC();const an=mac.createAnalyser();an.fftSize=512;mac.createMediaStreamSource(mStr).connect(an);const bf=new Uint8Array(512);let heard=0,q=0;const t0=Date.now(),tk=()=>{if(!mrc||mrc.state=='inactive')return;an.getByteTimeDomainData(bf);let m=0;for(const v of bf)m=Math.max(m,Math.abs(v-128));const l=m/128;mic.style.boxShadow='0 0 0 '+Math.round(l*18)+'px #ef444455';if(l>.06){heard=1;q=0}else if(heard)q++;if((heard&&q>110)||Date.now()-t0>60000||(!heard&&Date.now()-t0>9000)){mrc.stop();return}requestAnimationFrame(tk)};tk()}catch(e){}}
+micToggle=async function(){if(micOn){mWant=false;if(mSR){try{mSR.stop()}catch(e){}}else if(mrc&&mrc.state!='inactive')mrc.stop();return}
+stopAudio();_sc();mBase=$('#inp').value.trim();mFin='';mT0=Date.now();clearInterval(mTm);
+mTm=setInterval(()=>{const s=Math.round((Date.now()-mT0)/1000);$('#inp').placeholder='🔴 Listening… '+Math.floor(s/60)+':'+String(s%60).padStart(2,'0')+' · tap ⏹ when done';if(talk&&mSR&&mFin&&Date.now()-mLast>2800){mWant=false;try{mSR.stop()}catch(e){}}},500);
+if(SRc){mWant=true;micState(true);try{startSR();toast('Listening in '+(mLang=='hi-IN'?'Hindi':'English')+'… tap ⏹ when done')}catch(e){mWant=false;mSR=null;recStart()}}
+else if(window.MediaRecorder&&navigator.mediaDevices){micState(true);recStart()}else toast('Microphone is not supported here. Use Chrome over https.')};
+mic.onclick=micToggle;
+/* ---- real AI pictures (Flux via Pollinations, Puter as backup) ---- */
+const STY={'Educational illustration':'clean flat educational illustration, vibrant friendly colours, white background, clear simple shapes','Realistic photo':'high quality realistic photograph, natural light, sharp focus','Cartoon':'cute colourful cartoon illustration for kids','Watercolor':'soft watercolor painting, gentle colours','Whiteboard sketch':'hand-drawn whiteboard marker sketch, simple lines','3D render':'3D rendered scene, soft studio lighting'};
+const sty=()=>STY[($('#sSt')||{}).value]||STY['Educational illustration'];
+async function genImg(p,w,h,seed){for(let a=0;a<2;a++){const c=new AbortController(),tm=setTimeout(()=>c.abort(),70000);try{const r=await fetch('https://image.pollinations.ai/prompt/'+encodeURIComponent(p.slice(0,900))+'?width='+w+'&height='+h+'&model=flux&nologo=true&seed='+(seed+a),{signal:c.signal}),b=await r.blob();if(r.ok&&/image/.test(b.type)&&b.size>3000)return b}catch(e){}finally{clearTimeout(tm)}await new Promise(r=>setTimeout(r,2500))}
+if(window.puter&&puter.ai&&puter.ai.txt2img){try{const el=await puter.ai.txt2img(p);return await(await fetch(el.src)).blob()}catch(e){}}
+throw new Error('Picture servers are busy. Please try again in a minute, or choose Diagram (SVG).')}
+const small=(b,w)=>new Promise(r=>{const i=new Image();i.onload=()=>{const c=document.createElement('canvas');c.width=Math.min(w,i.width);c.height=Math.round(c.width*i.height/i.width);c.getContext('2d').drawImage(i,0,0,c.width,c.height);r(c.toDataURL('image/jpeg',.65))};i.src=URL.createObjectURL(b)});
+aiPic=async function(h,t,o={}){const[w,hh]=(o.size||($('#sAr')||{}).value||'1280x720').split('x').map(Number),s=sty();
+h.innerHTML='<p><i>🎨 Painting your picture… about 10–30 seconds.</i></p><div class="prog"><i style="width:70%;transition:width 25s"></i></div>';
+let p=t;if(!$('#sEn')||$('#sEn').checked){try{p=(await ask('Rewrite as ONE vivid image-generation prompt (max 60 words, English). Subject: '+t+'. Audience: '+(S.cls||'students')+'. Style: '+s+'. Show the key parts clearly and accurately. No text, letters or watermarks. Reply with only the prompt.')).trim().replace(/^["']|["']$/g,'')}catch(e){}}
+const b=await genImg(p+', '+s+', no text, no watermark',w,hh,Math.floor(Math.random()*1e6)),el=new Image();el.src=URL.createObjectURL(b);await new Promise((r,j)=>{el.onload=r;el.onerror=j});
+el.style.cssText='width:100%;border-radius:14px';h.innerHTML='';h.appendChild(el);picActions(h,el,t);
+const rg=document.createElement('button');rg.className='btn s sm';rg.textContent='🔄 Another version';rg.onclick=()=>aiPic(h,t,o).catch(e=>toast(e.message));h.querySelector('.tb').appendChild(rg)};
+/* ---- richer SVG diagrams / infographics ---- */
+const SVGP='You are a senior educational illustrator. Output ONE self-contained SVG. Design rules: soft off-white background rect; a bold title bar (36px) at the top; a consistent 5-colour palette using linearGradient fills in <defs>; rounded rectangles (rx 14) with a subtle drop-shadow filter; numbered step circles; arrows using <marker>; every label at least 20px sans-serif (font-family "Noto Sans Devanagari", system-ui, sans-serif), never overlapping or cut off, 24px margins; simple icons built from shapes (sun, drops, leaves, cells, gears); gentle SMIL animation (pulsing, flowing dashes) on the key flow; scientifically accurate labels; no scripts, no external resources. Reply with only the SVG code.';
+async function studioMake(h,k,t,o){o=o||{};if(/^Diagram/.test(k))k='Image';const ctx='Level: '+(S.cls||'general')+'. Subject: '+(S.sub||'general')+'. Topic: '+t+'.';
+if(k=='AI picture')return aiPic(h,t,o);if(k=='Animated explainer video')return makeVideo(h,t,ctx,o);
+let s=null;for(let a=0;a<2&&!s;a++){const c=getSvg(await ask(SVGP+'\nCreate a '+(k=='Infographic'?'tall infographic with viewBox="0 0 800 1100"':'labelled educational diagram with viewBox="0 0 800 600"')+'. '+ctx,{tier:'complex',images:o.images}));if(c){try{await loadImg(svgUrl(sized(c)));s=c}catch(e){}}}
+if(!s)throw new Error('Could not create the graphic. Please try again.');showVisual(h,s,t,k,true)}
+/* ---- narrated AI video: scene pictures + Ken Burns + voice-over + .webm export with sound ---- */
+async function makeVideo(h,t,ctx,o){h.innerHTML='<p><i>✍️ Writing the script…</i></p>';
+const d=pj(await ask(ctx+'\nWrite a 5-scene explainer video for students. Reply with ONLY JSON: {"title":"","scenes":[{"caption":"short heading","narration":"2 simple spoken sentences","prompt":"detailed description of one clear educational illustration for this scene, no text"}]}',{tier:'complex',images:o.images})),sc=(d.scenes||[]).slice(0,6);
+if(!sc.length)throw new Error('Could not create the video. Please try again.');
+for(let i=0;i<sc.length;i++){h.innerHTML='<p><i>🎨 Painting scene '+(i+1)+' of '+sc.length+'…</i></p><div class="prog"><i style="width:'+(i/sc.length*100)+'%"></i></div>';
+try{sc[i].img=await small(await genImg((sc[i].prompt||sc[i].caption)+', '+sty()+', no text, no watermark',1024,576,Math.floor(Math.random()*1e6)),800)}catch(e){}}
+player(h,d.title||t,sc);addHist({type:'video',k:'AI video',t:'Video: '+(d.title||t).slice(0,50),scenes:sc.map(x=>({caption:x.caption,narration:x.narration,img:x.img}))})}
+function drawScene(x,s,p,W,H,i,n){x.fillStyle='#0b1020';x.fillRect(0,0,W,H);const im=s._im;
+if(im){const r=Math.max(W/im.width,H/im.height)*(1+.07*p),iw=im.width*r,ih=im.height*r;x.drawImage(im,(W-iw)/2-(p-.5)*30,(H-ih)/2,iw,ih)}else{const g=x.createLinearGradient(0,0,W,H);g.addColorStop(0,'#0f4c5c');g.addColorStop(1,'#6d28d9');x.fillStyle=g;x.fillRect(0,0,W,H)}
+const g2=x.createLinearGradient(0,H-240,0,H);g2.addColorStop(0,'#0000');g2.addColorStop(1,'#000d');x.fillStyle=g2;x.fillRect(0,H-240,W,240);x.textBaseline='top';x.fillStyle='#fff';
+x.font='700 44px system-ui,"Noto Sans Devanagari",sans-serif';x.fillText(String(s.caption||'').slice(0,60),48,H-200);x.font='26px system-ui,"Noto Sans Devanagari",sans-serif';wrapT(x,s.narration||'',48,H-140,W-96,34,3);
+x.fillStyle='#ffffffcc';x.font='600 20px system-ui';x.fillText((i+1)+' / '+n,W-100,24);if(p<.06){x.fillStyle='rgba(11,16,32,'+(1-p/.06)+')';x.fillRect(0,0,W,H)}}
+let vStop=null;
+player=function(h,title,sc){if(vStop)vStop();const W=1280,H=720,nm=String(title||'explainer').toLowerCase().replace(/\W+/g,'_').slice(0,30)||'explainer';
+h.innerHTML='<div class="cap">🎬 '+esc(title||'Explainer')+'</div><canvas class="vcv" width="1280" height="720"></canvas><div class="prog"><i></i></div><div class="tb"><button class="btn sm" data-a="p">▶ Play with voice</button><button class="btn s sm" data-a="d">⬇ Video (.webm + voice)</button><button class="btn s sm" data-a="f">⬇ Storyboard PDF</button></div><p class="note">AI-generated video: review before class. Downloading records in real time, so keep this tab open.</p>';
+const c=h.querySelector('canvas'),x=c.getContext('2d'),bar=h.querySelector('.prog i'),pb=h.querySelector('[data-a=p]');let stop=false,playing=false,ac=null;
+const prep=sc.map(async s=>{try{s._im=s.img?await loadImg(s.img):s.s?await loadImg(svgUrl(sized(s.s))):null}catch(e){s._im=null}});Promise.all(prep).then(()=>drawScene(x,sc[0],.5,W,H,0,sc.length));
+vStop=()=>{stop=true};
+const loadA=async s=>{if(s._buf!==undefined)return;s._buf=null;try{const b=await ttsBlob(cleanSpeech(s.narration||''),HI(s.narration));if(b)s._buf=await ac.decodeAudioData(await b.arrayBuffer())}catch(e){}};
+async function play(dest){stop=false;ac=ac||new AC();if(ac.state=='suspended')await ac.resume();await Promise.all(prep);await Promise.all(sc.map(loadA));
+for(let i=0;i<sc.length&&!stop;i++){const s=sc[i],dur=Math.max(3.5,s._buf?s._buf.duration+.5:(s.narration||'').split(' ').length*.38);let src=null;
+if(s._buf){src=ac.createBufferSource();src.buffer=s._buf;src.connect(dest||ac.destination);src.start()}else if(!dest)try{browserSpeak([s.narration||''],HI(s.narration),spkTok,null)}catch(e){}
+const t0=performance.now();while(!stop){const p=Math.min(1,(performance.now()-t0)/1000/dur);drawScene(x,s,p,W,H,i,sc.length);bar.style.width=((i+p)/sc.length*100)+'%';if(p>=1)break;await new Promise(r=>setTimeout(r,33))}
+if(src)try{src.stop()}catch(e){}}try{speechSynthesis.cancel()}catch(e){}}
+async function record(){if(!window.MediaRecorder)throw new Error('Video download needs Chrome or Edge.');ac=ac||new AC();await ac.resume();const dest=ac.createMediaStreamDestination(),st=new MediaStream([...c.captureStream(30).getVideoTracks(),...dest.stream.getAudioTracks()]),mt=['video/webm;codecs=vp9,opus','video/webm;codecs=vp8,opus','video/webm'].find(m=>MediaRecorder.isTypeSupported(m)),rc=new MediaRecorder(st,{mimeType:mt,videoBitsPerSecond:4e6}),ch=[];
+rc.ondataavailable=e=>e.data.size&&ch.push(e.data);const fin=new Promise(r=>rc.onstop=r);await Promise.all(prep);await Promise.all(sc.map(loadA));rc.start();playing=true;await play(dest);playing=false;await new Promise(r=>setTimeout(r,300));rc.stop();await fin;return new Blob(ch,{type:'video/webm'})}
+async function story(){await Promise.all(prep);const d=new jspdf.jsPDF({unit:'pt',format:'a4',orientation:'l'}),pw=d.internal.pageSize.getWidth(),ph=d.internal.pageSize.getHeight(),k=Math.min(pw/W,ph/H),cv=document.createElement('canvas');cv.width=W;cv.height=H;
+sc.forEach((s,i)=>{drawScene(cv.getContext('2d'),s,.5,W,H,i,sc.length);if(i)d.addPage();d.addImage(cv.toDataURL('image/jpeg',.88),'JPEG',(pw-W*k)/2,(ph-H*k)/2,W*k,H*k)});await dl.save({filename:nm+'_storyboard.pdf',data:d.output('blob')})}
+h.onclick=async e=>{const a=e.target.dataset.a;if(!a)return;
+if(a=='p'){if(playing){stop=true;return}playing=true;pb.textContent='⏳ Preparing voice…';const sp=setTimeout(()=>pb.textContent='⏹ Stop',1500);await play(null);clearTimeout(sp);playing=false;pb.textContent='▶ Play with voice';return}
+if(a=='d'){if(playing||e.target.disabled)return;const b=e.target,o=b.textContent;b.disabled=true;b.textContent='⏺ Recording… keep tab open';try{await dl.save({filename:nm+'.webm',data:await record()})}catch(x){toast(x.message||'Could not create the video')}playing=false;b.textContent=o;b.disabled=false;return}
+if(a=='f')try{await story()}catch(x){toast('Could not create the PDF')}}};
+/* ---- Studio UI: kinds, style, shape, examples ---- */
+(function(){$('#sk').innerHTML='';const lab=$('#sFile').previousElementSibling;
+lab.insertAdjacentHTML('beforebegin','<div id="sOpt"><div class="g2"><div><label>Picture style</label><select id="sSt">'+Object.keys(STY).map(k=>'<option>'+k+'</option>').join('')+'</select></div><div><label>Shape</label><select id="sAr"><option value="1280x720">Landscape</option><option value="1024x1024">Square</option><option value="720x1280">Portrait</option></select></div></div><label style="display:flex;gap:6px;align-items:center"><input type="checkbox" id="sEn" checked style="width:auto"> ✨ Let AI write a richer picture prompt</label></div>');
+const up=()=>{$('#sOpt').style.display=/picture|video/.test(sk)?'block':'none';$('#sAr').parentElement.style.display=sk=='AI picture'?'block':'none'};
+sk='AI picture';chips('#sk',['AI picture','Diagram (SVG)','Infographic','Animated explainer video'],k=>{sk=k;up()},sk);up();
+const ex=document.createElement('div');ex.className='chips';['Water cycle for Class 5','Human heart with labelled parts','Solar system and planets','Photosynthesis in a leaf','How a vaccine works'].forEach(t=>{const s=document.createElement('span');s.className='chip';s.textContent=t;s.onclick=()=>$('#sTxt').value=t;ex.appendChild(s)});$('#sTxt').after(ex);
+$('#sGo').onclick=async()=>{const h=$('#sOut'),t=$('#sTxt').value.trim()||($('#sFile').files.length?'the attached material':'');if(!t)return h.innerHTML='<p class="err">Describe what to create.</p>';h.innerHTML='<p><i>Creating…</i></p>';
+try{await studioMake(h,sk,t,{images:await srcImgs()})}catch(e){if(sk=='AI picture'){try{h.innerHTML='<p class="note">Picture servers are busy, drawing a diagram instead…</p>';await studioMake(h,'Image',t,{});return}catch(x){}}h.innerHTML='<p class="err">'+esc(e.message||'Failed')+'</p>'}}})();
+chatMedia=async function(k,t,a){const h=document.createElement('div'),cap=document.createElement('div');h.className='vis';cap.innerHTML='<i>Creating your '+(k=='AI picture'?'picture':k.toLowerCase())+'… this can take up to a minute.</i>';a.innerHTML='';a.append(cap,h);
+try{await studioMake(h,k,t,{})}catch(e){if(k=='AI picture')await studioMake(h,'Image',t,{});else throw e}
+cap.textContent='Here is your '+(k=='AI picture'?'picture':k=='Animated explainer video'?'video (with voice-over)':k.toLowerCase())+':'};
+/* ---- chat actions + home dashboard ---- */
+const qs=t=>{go('chat');$('#inp').value=t;send()};
+addAct=function(a,r){const w=document.createElement('div');w.className='tb';
+[['🔊',()=>speak(r)],['📋',()=>navigator.clipboard.writeText(r).then(()=>toast('Copied'),()=>toast('Select and copy'))],['🌐 हिन्दी/EN',()=>qs('Translate your previous answer into '+(HI(r)?'English':'simple Hindi (Devanagari)')+'.')],['✨ Simpler',()=>qs('Explain that again more simply, with an everyday example.')],['🧠 Quiz me',()=>qs('Ask me 3 quick MCQs on this to check my understanding.')]].forEach(([l,f])=>{const b=document.createElement('button');b.className='btn s sm';b.textContent=l;b.onclick=f;w.appendChild(b)});a.appendChild(w)};
+const TIPS=['Type “create a video on photosynthesis” in chat: I paint the scenes and narrate them.','Tap 🎤 and speak Hindi or English. Turn on 🗣 Voice chat for a hands-free tutor.','Use ✨ Simpler under any answer for younger students.','Upload a photo of a worksheet in ✅ Check to get marks and feedback.','Pick another AI voice and speed in 🎨 → AI voice.','Diagram (SVG) gives accurate labels; AI picture gives beautiful art.'];
+const _home=home;home=function(){_home();let st=$('#st');if(!st){st=document.createElement('div');st.id='st';st.className='stats';$('#hs').after(st);const t=document.createElement('div');t.id='tip';t.className='tip';$('#hr').closest('.card').before(t)}
+const L=LIB(),n=r=>L.filter(x=>r.test(x.type||'')).length;st.innerHTML='<div><b>'+L.length+'</b>Saved</div><div><b>'+n(/quiz|cards/)+'</b>Quizzes & cards</div><div><b>'+n(/visual|pic|video/)+'</b>Visuals</div>';$('#tip').textContent='💡 '+TIPS[new Date().getDate()%TIPS.length]};
+home();
+})();
+</script>
+</body></html>
